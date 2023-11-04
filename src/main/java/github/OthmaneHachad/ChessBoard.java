@@ -11,26 +11,83 @@ import java.util.HashMap;
  *          - following this pattern, we don't have position attribution issues
  */
 public class ChessBoard {
-     /* Fields */
 
     // creates a 6x2 array of long values (64 bits)
-    private long[][] bitboards = new long[PieceType.values().length][Color.values().length];
+    private long[][] bitboards ;
+    private long whiteBitboard ;
+    private long blackBitboard ;
     private HashMap<String, String> boardInfo ;
 
-    /* End of Fields */
-
-
     // constructor to build the default position
-    public ChessBoard(){
+    public ChessBoard()
+    {
+        bitboards = new long[PieceType.values().length][Color.values().length] ;
         setupStartingPosition();
+
+        this.setWhiteBitboard();
+        this.setBlackBitboard();
     }
 
     // constructor to build a specific position
-    public ChessBoard(String fen){
+    public ChessBoard(String fen)
+    {
+        bitboards = new long[PieceType.values().length][Color.values().length] ;
         setupPosition(fen);
         this.setBoardInfo(fen);
+
+        this.setWhiteBitboard();
+        this.setBlackBitboard();
     }
 
+
+    public void movePiece(Move move)
+    {
+
+        // first OR operation with Piece bitboard
+        long pieceBitboard = this.getBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()];
+
+        long startPositionBitMask = 1L << move.getStartPosition() ;
+        long endPositionBitMask = 1L << move.getEndPosition() ;
+
+        // clear start position - perform AND operation with negating (NOT) startPositionBitMask
+        pieceBitboard = pieceBitboard & ~startPositionBitMask ;
+
+        // fill end position - setBitboards()
+        pieceBitboard = pieceBitboard | endPositionBitMask ;
+
+
+        // update bitboards
+        this.getBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()] = pieceBitboard ;
+
+        // TODO: compute and return updated FEN String
+
+    }
+
+
+    public boolean isSquareOccupied(int row, int column)
+    {
+        long mask = 1L << (row * 8 + column);
+        // get a bitboard of occupied squares whether black or white
+        long occupationBitboard = this.whiteBitboard | this.blackBitboard ;
+
+        // if non-zero square occupied (true)
+        // - if zero square not occupied (false)
+        return (occupationBitboard & mask) != 0 ;
+    }
+
+    public boolean isSameColor(int x, int y, Color color)
+    {
+        // get the Color bitboards: 64 bitboards for each color side
+        //get the color bitboard of the Color parameter
+        long colorBitboard = color == Color.WHITE ? this.whiteBitboard : this.blackBitboard ;
+
+        // perform bitwise AND with 1L << position of the x,y
+        long newColorBitboard = colorBitboard | 1L << (x * 8 + y);
+
+        // if bitboard decimal value has changed, it is not the same color
+        return newColorBitboard == colorBitboard ;
+        // TODO: test this method
+    }
 
     /**
      * setupStartingPosition will update the bitboards according to default 
@@ -154,6 +211,35 @@ public class ChessBoard {
         return this.bitboards;
     }
 
+    public long getWhiteBitboard()
+    {
+        return this.whiteBitboard ;
+    }
+
+    public void setWhiteBitboard()
+    {
+        this.whiteBitboard = 0L ;
+        for (int i = 0; i < this.bitboards.length; i++)
+        {
+            this.whiteBitboard |= this.bitboards[i][0] ;
+        }
+    }
+
+    public long getBlackBitboard()
+    {
+        return this.blackBitboard ;
+    }
+
+    public void setBlackBitboard()
+    {
+        this.blackBitboard = 0L ;
+        for (int i = 0; i < this.bitboards.length; i++)
+        {
+            this.blackBitboard |= this.bitboards[i][1] ;
+        }
+    }
+
+
     /**
      * setBitboards performs bitwise operation to put a piece on the board
      * 
@@ -179,9 +265,10 @@ public class ChessBoard {
         this.boardInfo = this.parseFen(fen);
     }
 
+    @Override
     public String toString() {
         String boardToString = "" ;
-        for (int row = 7; row >= 0; row--) { // Start from the top row (black's side)
+        for (int row = 0; row < 8 ; row++) { // Start from the top row (black's side)
             for (int col = 0; col < 8; col++) {
                 int position = row * 8 + col;
                 char pieceChar = '.';
@@ -199,5 +286,15 @@ public class ChessBoard {
         }
         return boardToString ;
     }
+    /** OUTPUT
+     * r n b q k b n r
+     * p p p p p p p p
+     * . . . . . . . .
+     * . . . . . . . .
+     * . . . . . . . .
+     * . . . . . . . .
+     * P P P P P P P P
+     * R N B Q K B N R
+     */
 
 }

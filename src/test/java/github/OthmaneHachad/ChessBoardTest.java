@@ -16,7 +16,7 @@ class ChessBoardTest {
     void setUp() {
         // do any of the initialization code that should be run before each
         // test method HERE
-        chessBoard = new ChessBoard("8/8/8/8/8/8/8/8 w KQkq - 0 1") ;
+        chessBoard = new ChessBoard() ;
     }
 
     @Test
@@ -183,5 +183,45 @@ class ChessBoardTest {
         assertEquals(board[5][0], whiteKing);
         assertEquals(board[5][1], blackKing);
     }
+
+    @Test
+    void testIsSquareOccupiedFalse() {
+        // TODO: Implement this test
+        boolean squareOccupied  = chessBoard.isSquareOccupied(3,3);
+        assertEquals(false, squareOccupied);
+    }
+
+    @Test
+    void testIsSquareOccupiedTrue() {
+        // TODO: Implement this test
+        boolean squareOccupied  = chessBoard.isSquareOccupied(0,3);
+        assertEquals(true, squareOccupied);
+    }
+
+    @Test
+    void testIsSameColor() {
+        // TODO: Implement this test
+        //fail("Not yet implemented");
+    }
+
+    @Test
+    void testMovePiece()
+    {
+        // TODO: Implement this test
+        //fail("Not yet implemented");
+    }
+
+    @Test
+    void testSetWhiteBitboard() {
+        // TODO: Implement this test
+        //fail("Not yet implemented");
+    }
+
+    @Test
+    void testSetBlackBitboard() {
+        // TODO: Implement this test
+        //fail("Not yet implemented");
+    }
+
 
 }
