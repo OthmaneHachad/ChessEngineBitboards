@@ -21,6 +21,9 @@ class ChessBoardTest {
 
     @Test
     public void testSetBitboardsWhite() {
+
+        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
+
         // Assume that 0 is the ordinal for PAWN and 1 is for WHITE
         int pieceTypeOrdinal = PieceType.PAWN.ordinal();
         int colorOrdinal = Color.WHITE.ordinal();
@@ -30,10 +33,10 @@ class ChessBoardTest {
 
 
         // Call the method to be tested
-        chessBoard.setBitboards(PieceType.PAWN, Color.WHITE, position);
+        chessBoardEmpty.setBitboards(PieceType.PAWN, Color.WHITE, position);
 
         // Retrieve the bitboard
-        long[][] bitboards = chessBoard.getBitboards();
+        long[][] bitboards = chessBoardEmpty.getBitboards();
 
         // Calculate the expected bitboard value
         long expectedBitboardValue = 1L << position;
@@ -44,6 +47,9 @@ class ChessBoardTest {
 
     @Test
     public void testSetBitboardsBlack() {
+
+        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
+
         // Assume that 0 is the ordinal for PAWN and 1 is for WHITE
         int pieceTypeOrdinal = PieceType.PAWN.ordinal();
         int colorOrdinal = Color.BLACK.ordinal();
@@ -53,10 +59,10 @@ class ChessBoardTest {
 
 
         // Call the method to be tested
-        chessBoard.setBitboards(PieceType.PAWN, Color.BLACK, position);
+        chessBoardEmpty.setBitboards(PieceType.PAWN, Color.BLACK, position);
 
         // Retrieve the bitboard
-        long[][] bitboards = chessBoard.getBitboards();
+        long[][] bitboards = chessBoardEmpty.getBitboards();
 
         // Calculate the expected bitboard value
         long expectedBitboardValue = 1L << position;
@@ -68,6 +74,7 @@ class ChessBoardTest {
     @Test
     public void testSetPiece()
     {
+        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
         // Assume that 0 is the ordinal for PAWN and 1 is for WHITE
         int pieceTypeOrdinal = PieceType.PAWN.ordinal();
         int colorOrdinal = Color.WHITE.ordinal();
@@ -81,14 +88,18 @@ class ChessBoardTest {
         // expected computed position by setPiece
         int position = 10;
 
+        assertEquals(0L, chessBoardEmpty.getBitboards()[pieceTypeOrdinal][colorOrdinal]);
+
         // Call the method to be tested
-        chessBoard.setPiece(PieceType.PAWN, Color.WHITE, row, column);
+        chessBoardEmpty.setPiece(PieceType.PAWN, Color.WHITE, row, column);
 
         // Retrieve the bitboard
-        long[][] bitboards = chessBoard.getBitboards();
+        long[][] bitboards = chessBoardEmpty.getBitboards();
 
         // Calculate the expected bitboard value
         long expectedBitboardValue = 1L << position;
+
+        System.out.println(expectedBitboardValue + "  " + bitboards[pieceTypeOrdinal][colorOrdinal]);
 
         // Check that the bitboard was updated correctly
         assertEquals(expectedBitboardValue, bitboards[pieceTypeOrdinal][colorOrdinal]);
@@ -146,42 +157,42 @@ class ChessBoardTest {
         long blackKing = 0b00010000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L;
         long whiteKing = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00010000L;
 
-        System.out.println(board[0][0] + " PAWNS " + whitePawns);
-        System.out.println(board[0][1]+ " PAWNS " + blackPawns);
-        assertEquals(board[0][0], whitePawns);
-        assertEquals(board[0][1], blackPawns);
+        System.out.println(board[0][Color.WHITE.ordinal()] + " PAWNS " + whitePawns);
+        System.out.println(board[0][Color.BLACK.ordinal()]+ " PAWNS " + blackPawns);
+        assertEquals(board[0][Color.WHITE.ordinal()], whitePawns);
+        assertEquals(board[0][Color.BLACK.ordinal()], blackPawns);
 
         /**
          * Issue with the asserEquals here, fix the bitboards
          */
 
-        System.out.println(board[1][0] == whiteRooks);
-        System.out.println(board[1][1] == blackRooks);
+        System.out.println(board[1][Color.WHITE.ordinal()] + " ROOKS " + whiteRooks);
+        System.out.println(board[1][Color.BLACK.ordinal()] + " ROOKS " + blackRooks);
 
-        assertEquals(board[1][0], whiteRooks);
-        assertEquals(board[1][1], blackRooks);
+        assertEquals(board[1][Color.WHITE.ordinal()], whiteRooks);
+        assertEquals(board[1][Color.BLACK.ordinal()], blackRooks);
 
-        System.out.println(board[2][0] == whiteKnights);
-        System.out.println(board[2][1] == blackKnights);
-        assertEquals(board[2][0], whiteKnights);
-        assertEquals(board[2][1], blackKnights);
+        System.out.println(board[2][Color.WHITE.ordinal()] == whiteKnights);
+        System.out.println(board[2][Color.BLACK.ordinal()] == blackKnights);
+        assertEquals(board[2][Color.WHITE.ordinal()], whiteKnights);
+        assertEquals(board[2][Color.BLACK.ordinal()], blackKnights);
 
-        System.out.println(board[3][0] == whiteBishops);
-        System.out.println(board[3][1] == blackBishops);
-        assertEquals(board[3][0], whiteBishops);
-        assertEquals(board[3][1], blackBishops);
+        System.out.println(board[3][Color.WHITE.ordinal()] == whiteBishops);
+        System.out.println(board[3][Color.BLACK.ordinal()] == blackBishops);
+        assertEquals(board[3][Color.WHITE.ordinal()], whiteBishops);
+        assertEquals(board[3][Color.BLACK.ordinal()], blackBishops);
 
-        System.out.println(board[4][0] == whiteQueen);
-        System.out.println(board[4][1] == blackQueen);
+        System.out.println(board[4][Color.WHITE.ordinal()] == whiteQueen);
+        System.out.println(board[4][Color.BLACK.ordinal()] == blackQueen);
 
-        System.out.println(board[5][0] == whiteKing);
-        System.out.println(board[5][1] == blackKing);
-        assertEquals(board[4][0], whiteQueen);
-        assertEquals(board[4][1], blackQueen);
+        System.out.println(board[5][Color.WHITE.ordinal()] == whiteKing);
+        System.out.println(board[5][Color.BLACK.ordinal()] == blackKing);
+        assertEquals(board[4][Color.WHITE.ordinal()], whiteQueen);
+        assertEquals(board[4][Color.BLACK.ordinal()], blackQueen);
 
 
-        assertEquals(board[5][0], whiteKing);
-        assertEquals(board[5][1], blackKing);
+        assertEquals(board[5][Color.WHITE.ordinal()], whiteKing);
+        assertEquals(board[5][Color.BLACK.ordinal()], blackKing);
     }
 
     @Test

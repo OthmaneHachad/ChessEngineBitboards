@@ -37,50 +37,50 @@ public class MoveValidator {
         return true ;
     }
 
-    private boolean rookMoveLegal(Move move)
-    {
-        int startX = (move.getStartPosition() / 8) ;
+    public boolean rookMoveLegal(Move move) {
+        int startX = (move.getStartPosition() / 8);
         int endX = (move.getEndPosition() / 8);
 
-        int startY = (move.getStartPosition() % 8) ;
-        int endY = (move.getEndPosition() % 8) ;
+        int startY = (move.getStartPosition() % 8);
+        int endY = (move.getEndPosition() % 8);
 
-        int dx = endX - startX ;
-        int dy = endY - startY ;
+        int dx = endX - startX;
+        int dy = endY - startY;
 
-        if ((dx != 0 && dy != 0) || (dx == 0 && dy == 0))
-        {
-            return false ;
+        if ((dx != 0 && dy != 0) || (dx == 0 && dy == 0)) {
+            System.out.println("both x and y are different than starting position ");
+            return false;
         }
 
-        int stepX =(dx != 0) ? dx / Math.abs(dx) : 0 ;
-        int stepY = (dy != 0) ? dy / Math.abs(dy) : 0 ;
+        int stepX = (dx != 0) ? dx / Math.abs(dx) : 0;
+        int stepY = (dy != 0) ? dy / Math.abs(dy) : 0;
 
-        // check for any obstructions
+        // Check for any obstructions along the path, excluding the destination square
         for (int x = startX + stepX, y = startY + stepY;
-             x != endX || y != endY;
-             x += stepX, y += stepY)
-        {
-            if (this.getChessboard().isSquareOccupied(x, y))
-            {
-                // means there is a piece blocking the way
+             (stepX > 0 ? x <= endX : (stepX < 0 ? x >= endX : true)) &&
+                     (stepY > 0 ? y <= endY : (stepY < 0 ? y >= endY : true));
+             x += stepX, y += stepY) {
+
+            if (this.getChessboard().isSquareOccupied(x, y)) {
+                // Means there is a piece blocking the way
+                System.out.println("piece blocking the way");
                 return false;
             }
         }
 
-
-        if (this.getChessboard().isSquareOccupied(endX, endY))
-        {
-            // for final square, we check if the piece can be captured (opposite color)
-            if (this.getChessboard().isSameColor(endX, endY, move.getColor()))
-            {
-                return false ;
+        // Check the destination square separately
+        if (this.getChessboard().isSquareOccupied(endX, endY)) {
+            // For final square, we check if the piece can be captured (opposite color)
+            if (this.getChessboard().isSameColor(endX, endY, move.getColor())) {
+                System.out.println("same color piece at end position");
+                return false;
             }
         }
 
-
-        return true ;
+        return true;
     }
+
+
 
     private boolean kingMoveLegal(Move move)
     {

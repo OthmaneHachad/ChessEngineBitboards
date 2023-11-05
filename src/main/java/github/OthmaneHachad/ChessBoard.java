@@ -106,20 +106,20 @@ public class ChessBoard {
     public void setupPosition(String fen) {
         // Parse the FEN string to translate correctly to the 64 bitboard
         String[] board = this.parseFen(fen).get("board_layout").split("/");
-        for (int s = board.length -1; s >= 0; s--) {
+        for (int r = 0; r < board.length; r++) {
             // s initialized at 7 because black pieces at the top values
             int column = 0;  // Initialize column counter
-            System.out.println(board[s]);
+            System.out.println(board[board.length-r-1]);
 
-            for (int i = 0; i < board[s].length(); i++) {
-                char ch = board[s].charAt(i);
+            for (int i = 0; i < board[board.length-r-1].length(); i++) {
+                char ch = board[board.length-r-1].charAt(i);
                 if (Character.isDigit(ch)) {
                     // If the character is a digit, skip the corresponding number of squares
                     column += Character.getNumericValue(ch);
                 } else {
                     // Otherwise, update the bitboards
                     Color c = Character.isLowerCase(ch) ? Color.BLACK : Color.WHITE;
-                    setPiece(charToPieceType(ch), c, s, column);
+                    setPiece(charToPieceType(ch), c, r, column);
                     column++;  // Increment the column counter
                 }
             }
@@ -141,7 +141,9 @@ public class ChessBoard {
      */
     public void setPiece(PieceType pieceType, Color color, int row, int column)
     {
+        System.out.print("row: " + row + " column: " + column + "  ");
         int position = row * 8 + column ;
+        System.out.println("position: " + position);
         this.setBitboards(pieceType, color, position);
         
     }
@@ -221,7 +223,7 @@ public class ChessBoard {
         this.whiteBitboard = 0L ;
         for (int i = 0; i < this.bitboards.length; i++)
         {
-            this.whiteBitboard |= this.bitboards[i][0] ;
+            this.whiteBitboard |= this.bitboards[i][Color.WHITE.ordinal()] ;
         }
     }
 
@@ -235,7 +237,7 @@ public class ChessBoard {
         this.blackBitboard = 0L ;
         for (int i = 0; i < this.bitboards.length; i++)
         {
-            this.blackBitboard |= this.bitboards[i][1] ;
+            this.blackBitboard |= this.bitboards[i][Color.BLACK.ordinal()] ;
         }
     }
 
