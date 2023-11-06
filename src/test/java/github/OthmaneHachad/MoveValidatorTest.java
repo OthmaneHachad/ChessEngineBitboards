@@ -119,6 +119,45 @@ class MoveValidatorTest {
     }
 
 
+    @Test
+    void testBishopMoveLegal()
+    {
+        // Set up the board position using the FEN string
+        ChessBoard chessBoard = new ChessBoard("8/8/1pp5/8/3B4/8/1Pp5/8 w - - 0 1");
+        MoveValidator validator = new MoveValidator(chessBoard);
+
+        // Scenario 1: Basic Diagonal Movement Up-Right 1 square
+        Move diagonalUpRight = new Move(27, 36, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to e5
+        assertEquals(true, validator.bishopMoveLegal(diagonalUpRight));
+
+        // Scenario 2: Basic Diagonal Movement Up-Left 1 square
+        Move diagonalUpLeft = new Move(27, 34, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to c3
+        assertEquals(true, validator.bishopMoveLegal(diagonalUpLeft));
+
+        // Scenario 3: Basic Diagonal Movement Up-Left 2 square + Capture
+        Move diagonalUpLeft2 = new Move(27, 41, PieceType.BISHOP, Color.WHITE, PieceType.PAWN); // Assuming move from d4 to c3
+        assertEquals(true, validator.bishopMoveLegal(diagonalUpLeft2));
+
+        // Scenario 4: Basic Diagonal Movement Down-Right 1 square down
+        Move diagonalDownRight = new Move(27, 20, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to f6
+        assertEquals(true, validator.bishopMoveLegal(diagonalDownRight));
+
+        // Scenario 5: Basic Diagonal Movement Down-Right 2 square down
+        Move diagonalDownRight2 = new Move(27, 13, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to f6
+        assertEquals(true, validator.bishopMoveLegal(diagonalDownRight2));
+
+        // Scenario 6: Basic Diagonal Movement Down-Left 1 square
+        Move diagonalDownLeft = new Move(27, 18, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to b2
+        assertEquals(true, validator.bishopMoveLegal(diagonalDownLeft));
+
+        // Scenario 7: Blocked Movement Down-Left
+        Move blockedDownLeft = new Move(27, 9, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to a1 (invalid move)
+        assertEquals(false, validator.bishopMoveLegal(blockedDownLeft));
+
+        // Scenario 8: Illegal non-diagonal move
+        Move blockedUpRight = new Move(27, 49, PieceType.BISHOP, Color.WHITE, null); // Assuming move from d4 to g9 (invalid move)
+        assertEquals(false, validator.bishopMoveLegal(blockedUpRight));
+    }
 
     @Test
     void getChessboard() {

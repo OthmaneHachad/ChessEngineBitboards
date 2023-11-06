@@ -22,13 +22,49 @@ public class MoveValidator {
         }
     }
 
-    private boolean knightMoveLegal(Move move)
+    public boolean knightMoveLegal(Move move)
     {
         return true ;
     }
 
-    private boolean bishopMoveLegal(Move move)
+    public boolean bishopMoveLegal(Move move)
     {
+        int startX = (move.getStartPosition() / 8);
+        int endX = (move.getEndPosition() / 8);
+
+        int startY = (move.getStartPosition() % 8);
+        int endY = (move.getEndPosition() % 8);
+
+        int dx = endX - startX;
+        int dy = endY - startY;
+
+        if (Math.abs(endX - startX) != Math.abs(endY - startY)) {
+            System.out.println("abs dx: " +Math.abs(endX - startX) + " abs dy: " +Math.abs(endY - startY));
+            System.out.println("both x and y have to be different than starting position");
+            return false;
+        }
+
+        int stepX = endX > startX ? 1 : -1 ;
+        int stepY = endY > startY ? 1 : -1 ;
+
+        for (int x = startX + stepX, y = startY + stepY;
+             x != endX && y != endY;
+             x += stepX, y += stepY) {
+            if (this.getChessboard().isSquareOccupied(x, y)) {
+                // Means there is a piece blocking the way
+                return false;
+            }
+        }
+
+        // Check the destination square separately
+        if (this.getChessboard().isSquareOccupied(endX, endY)) {
+            // For final square, we check if the piece can be captured (opposite color)
+            if (this.getChessboard().isSameColor(endX, endY, move.getColor())) {
+                System.out.println("same color piece at end position");
+                return false;
+            }
+        }
+
         return true ;
     }
 
