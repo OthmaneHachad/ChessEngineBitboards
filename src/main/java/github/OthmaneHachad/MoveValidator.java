@@ -68,9 +68,30 @@ public class MoveValidator {
         return true ;
     }
 
-    private boolean queenMoveLegal(Move move)
+    public boolean queenMoveLegal(Move move)
     {
-        return true ;
+        int startX = (move.getStartPosition() / 8);
+        int endX = (move.getEndPosition() / 8);
+
+        int startY = (move.getStartPosition() % 8);
+        int endY = (move.getEndPosition() % 8);
+
+        int dx = endX - startX;
+        int dy = endY - startY;
+
+        // Determine whether the movement is sliding or diagonal
+        boolean isDiagonal = Math.abs(dx) == Math.abs(dy);
+        boolean isSliding = dx == 0 || dy == 0 ;
+
+        if (isSliding)
+        {
+            return this.rookMoveLegal(move);
+        } else if (isDiagonal)
+        {
+            return this.bishopMoveLegal(move);
+        }
+        // Not a valid move
+        return false ;
     }
 
     public boolean rookMoveLegal(Move move) {
@@ -93,8 +114,7 @@ public class MoveValidator {
 
         // Check for any obstructions along the path, excluding the destination square
         for (int x = startX + stepX, y = startY + stepY;
-             (stepX > 0 ? x <= endX : (stepX < 0 ? x >= endX : true)) &&
-                     (stepY > 0 ? y <= endY : (stepY < 0 ? y >= endY : true));
+             x != endX && y != endY;
              x += stepX, y += stepY) {
 
             if (this.getChessboard().isSquareOccupied(x, y)) {

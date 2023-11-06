@@ -160,6 +160,52 @@ class MoveValidatorTest {
     }
 
     @Test
+    void testQueenMoveLegal() {
+        // Set up the board position using the FEN string
+        ChessBoard chessBoard = new ChessBoard("8/p7/1Pp2p2/8/3Q4/8/1Pp5/P7 w - - 0 1");
+        MoveValidator validator = new MoveValidator(chessBoard);
+
+        // Horizontal and Vertical Movements
+        // Assuming the queen is initially at d4
+        Move horizontalRight = new Move(27, 35, PieceType.QUEEN, Color.WHITE, null); // d4 to h4
+        Move horizontalLeft = new Move(27, 19, PieceType.QUEEN, Color.WHITE, null); // d4 to a4
+        Move verticalDown = new Move(27, 3, PieceType.QUEEN, Color.WHITE, null); // d4 to d1
+        Move verticalUp1 = new Move(27, 35, PieceType.QUEEN, Color.WHITE, null); // d4 to d8 (Scenario 1)
+        Move verticalUp2 = new Move(27, 43, PieceType.QUEEN, Color.WHITE, null); // d4 to d8 (Scenario 2)
+        Move verticalUp3 = new Move(27, 51, PieceType.QUEEN, Color.WHITE, null); // d4 to d8 (Scenario 3)
+        Move verticalUp = new Move(27, 59, PieceType.QUEEN, Color.WHITE, null); // d4 to d8 (Scenario 4)
+
+        // Diagonal Movements
+        // Assuming the queen is initially at d4
+        Move diagonalUpRight = new Move(27, 36, PieceType.QUEEN, Color.WHITE, null); // d4 to e5
+        Move captureUpRight = new Move(27, 45, PieceType.QUEEN, Color.WHITE, PieceType.PAWN); // d4 to e5
+        Move diagonalUpLeft = new Move(27, 34, PieceType.QUEEN, Color.WHITE, null); // d4 to c5
+        Move diagonalDownRight = new Move(27, 20, PieceType.QUEEN, Color.WHITE, null); // d4 to e3
+        Move diagonalDownRight2 = new Move(27, 13, PieceType.QUEEN, Color.WHITE, null); // d4 to e2
+        Move diagonalDownLeft = new Move(27, 18, PieceType.QUEEN, Color.WHITE, null); // d4 to c3
+        Move blockedDownLeft = new Move(27, 9, PieceType.QUEEN, Color.WHITE, null); // d4 to b2
+        Move blockedUpLeft = new Move(27, 41, PieceType.QUEEN, Color.WHITE, null); // d4 to g7
+
+        // Validate queen movements
+        assertEquals(true, validator.queenMoveLegal(horizontalRight));
+        assertEquals(true, validator.queenMoveLegal(horizontalLeft));
+        assertEquals(true, validator.queenMoveLegal(verticalDown));
+        assertEquals(true, validator.queenMoveLegal(verticalUp1));
+        assertEquals(true, validator.queenMoveLegal(verticalUp2));
+        assertEquals(true, validator.queenMoveLegal(verticalUp3));
+        assertEquals(true, validator.queenMoveLegal(verticalUp));
+        assertEquals(true, validator.queenMoveLegal(diagonalUpRight));
+        assertEquals(true, validator.queenMoveLegal(diagonalUpLeft));
+        assertEquals(true, validator.queenMoveLegal(captureUpRight));
+        assertEquals(true, validator.queenMoveLegal(diagonalDownRight));
+        assertEquals(true, validator.queenMoveLegal(diagonalDownRight2));
+        assertEquals(true, validator.queenMoveLegal(diagonalDownLeft));
+        assertEquals(false, validator.queenMoveLegal(blockedDownLeft));
+        assertEquals(false, validator.queenMoveLegal(blockedUpLeft));
+    }
+
+
+    @Test
     void getChessboard() {
     }
 }
