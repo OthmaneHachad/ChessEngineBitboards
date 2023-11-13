@@ -20,7 +20,7 @@ class ChessBoardTest {
     }
 
     @Test
-    public void testSetBitboardsWhite() {
+    public void testsetLayoutBitboardsWhite() {
 
         ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
 
@@ -33,10 +33,10 @@ class ChessBoardTest {
 
 
         // Call the method to be tested
-        chessBoardEmpty.setBitboards(PieceType.PAWN, Color.WHITE, position);
+        chessBoardEmpty.setLayoutBitboards(PieceType.PAWN, Color.WHITE, position);
 
         // Retrieve the bitboard
-        long[][] bitboards = chessBoardEmpty.getBitboards();
+        long[][] bitboards = chessBoardEmpty.getLayoutBitboards();
 
         // Calculate the expected bitboard value
         long expectedBitboardValue = 1L << position;
@@ -46,7 +46,7 @@ class ChessBoardTest {
     }
 
     @Test
-    public void testSetBitboardsBlack() {
+    public void testsetLayoutBitboardsBlack() {
 
         ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
 
@@ -59,10 +59,10 @@ class ChessBoardTest {
 
 
         // Call the method to be tested
-        chessBoardEmpty.setBitboards(PieceType.PAWN, Color.BLACK, position);
+        chessBoardEmpty.setLayoutBitboards(PieceType.PAWN, Color.BLACK, position);
 
         // Retrieve the bitboard
-        long[][] bitboards = chessBoardEmpty.getBitboards();
+        long[][] bitboards = chessBoardEmpty.getLayoutBitboards();
 
         // Calculate the expected bitboard value
         long expectedBitboardValue = 1L << position;
@@ -88,13 +88,13 @@ class ChessBoardTest {
         // expected computed position by setPiece
         int position = 10;
 
-        assertEquals(0L, chessBoardEmpty.getBitboards()[pieceTypeOrdinal][colorOrdinal]);
+        assertEquals(0L, chessBoardEmpty.getLayoutBitboards()[pieceTypeOrdinal][colorOrdinal]);
 
         // Call the method to be tested
         chessBoardEmpty.setPiece(PieceType.PAWN, Color.WHITE, row, column);
 
         // Retrieve the bitboard
-        long[][] bitboards = chessBoardEmpty.getBitboards();
+        long[][] bitboards = chessBoardEmpty.getLayoutBitboards();
 
         // Calculate the expected bitboard value
         long expectedBitboardValue = 1L << position;
@@ -134,7 +134,7 @@ class ChessBoardTest {
          * white -> Lowest values
          *
          */
-        long[][] board = chessBoard.getBitboards() ;
+        long[][] board = chessBoard.getLayoutBitboards() ;
         System.out.println(chessBoard.getBoardInfo().get("board_layout"));
 
         //long bitboard = 0b11111111_11111111_00000000_00000000_00000000_00000000_11111111_11111111;

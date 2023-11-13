@@ -12,27 +12,41 @@ import java.util.HashMap;
  */
 public class ChessBoard {
 
-    // creates a 6x2 array of long values (64 bits)
-    private long[][] bitboards ;
+    //EngineCore reference
+    EngineCore engine ;
+
+
+    // creates a 6x2 array of long values (64 bits) - Piece Layout
+    private long[][] layoutBitboards ;
+
+    // creates 6x2 array of long values (64bits) - Possible Piece Moves
+    private long[][] pieceMoveBitboards ;
+
     private long whiteBitboard ;
     private long blackBitboard ;
     private HashMap<String, String> boardInfo ;
 
+    // instance of MoveValidator
+    private MoveValidator Judge ;
+
     // constructor to build the default position
     public ChessBoard()
     {
-        bitboards = new long[PieceType.values().length][Color.values().length] ;
-        setupStartingPosition();
+        this.layoutBitboards = new long[PieceType.values().length][Color.values().length] ;
+        this.pieceMoveBitboards = new long[PieceType.values().length][Color.values().length] ;
+        this.setupStartingPosition();
 
         this.setWhiteBitboard();
         this.setBlackBitboard();
+        Judge = new MoveValidator(this);
     }
 
     // constructor to build a specific position
     public ChessBoard(String fen)
     {
-        bitboards = new long[PieceType.values().length][Color.values().length] ;
-        setupPosition(fen);
+        this.layoutBitboards = new long[PieceType.values().length][Color.values().length] ;
+        this.pieceMoveBitboards = new long[PieceType.values().length][Color.values().length] ;
+        this.setupPosition(fen);
         this.setBoardInfo(fen);
 
         this.setWhiteBitboard();
@@ -40,11 +54,12 @@ public class ChessBoard {
     }
 
 
+
     public void movePiece(Move move)
     {
 
         // first OR operation with Piece bitboard
-        long pieceBitboard = this.getBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()];
+        long pieceBitboard = this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()];
 
         long startPositionBitMask = 1L << move.getStartPosition() ;
         long endPositionBitMask = 1L << move.getEndPosition() ;
@@ -52,17 +67,28 @@ public class ChessBoard {
         // clear start position - perform AND operation with negating (NOT) startPositionBitMask
         pieceBitboard = pieceBitboard & ~startPositionBitMask ;
 
-        // fill end position - setBitboards()
+        // fill end position - setLayoutBitboards()
         pieceBitboard = pieceBitboard | endPositionBitMask ;
 
 
         // update bitboards
-        this.getBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()] = pieceBitboard ;
+        this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()] = pieceBitboard ;
 
         // TODO: compute and return updated FEN String
 
     }
 
+    public PieceType getPieceAt(int position) {
+        for (PieceType pieceType : PieceType.values()) {
+            for (Color color : Color.values()) {
+                long bitboard = layoutBitboards[pieceType.ordinal()][color.ordinal()];
+                if ((bitboard & (1L << position)) != 0) {
+                    return pieceType;
+                }
+            }
+        }
+        return null; // No piece found at the given position
+    }
 
     public boolean isSquareOccupied(int row, int column)
     {
@@ -79,7 +105,7 @@ public class ChessBoard {
     {
         // get the Color bitboards: 64 bitboards for each color side
         //get the color bitboard of the Color parameter
-        long colorBitboard = color == Color.WHITE ? this.whiteBitboard : this.blackBitboard ;
+        long colorBitboard = color == Color.WHITE ? this.getWhiteBitboard() : this.getBlackBitboard() ;
 
         // perform bitwise AND with 1L << position of the x,y
         long newColorBitboard = colorBitboard | 1L << (x * 8 + y);
@@ -120,6 +146,7 @@ public class ChessBoard {
                     // Otherwise, update the bitboards
                     Color c = Character.isLowerCase(ch) ? Color.BLACK : Color.WHITE;
                     setPiece(charToPieceType(ch), c, r, column);
+                    // TODO: Update the piece's reachable squares bitboard
                     column++;  // Increment the column counter
                 }
             }
@@ -144,7 +171,7 @@ public class ChessBoard {
         System.out.print("row: " + row + " column: " + column + "  ");
         int position = row * 8 + column ;
         System.out.println("position: " + position);
-        this.setBitboards(pieceType, color, position);
+        this.setLayoutBitboards(pieceType, color, position);
         
     }
 
@@ -208,10 +235,28 @@ public class ChessBoard {
      * getter method fro bitboards
      * @return the 2D-array of long values
      */
-    public long[][] getBitboards()
+    public long[][] getLayoutBitboards()
     {
-        return this.bitboards;
+        return this.layoutBitboards;
     }
+
+
+
+    /**
+     * setLayoutBitboards performs bitwise operation to put a piece on the board
+     *
+     * @param pieceType is the type of piece we will update
+     *      i.e Pawn
+     * @param color is the color type of the piece we will update
+     *      i.e Black/White Pawn
+     * @param position is the position from 0-63
+     */
+    public void setLayoutBitboards(PieceType pieceType, Color color, int position)
+    {
+        this.layoutBitboards[pieceType.ordinal()][color.ordinal()] |= (1L << position);
+        // 000000000000...0000000 || 000000010000...0000000 = 000000010000...0000000
+    }
+
 
     public long getWhiteBitboard()
     {
@@ -221,9 +266,9 @@ public class ChessBoard {
     public void setWhiteBitboard()
     {
         this.whiteBitboard = 0L ;
-        for (int i = 0; i < this.bitboards.length; i++)
+        for (int i = 0; i < this.layoutBitboards.length; i++)
         {
-            this.whiteBitboard |= this.bitboards[i][Color.WHITE.ordinal()] ;
+            this.whiteBitboard |= this.layoutBitboards[i][Color.WHITE.ordinal()] ;
         }
     }
 
@@ -235,27 +280,23 @@ public class ChessBoard {
     public void setBlackBitboard()
     {
         this.blackBitboard = 0L ;
-        for (int i = 0; i < this.bitboards.length; i++)
+        for (int i = 0; i < this.layoutBitboards.length; i++)
         {
-            this.blackBitboard |= this.bitboards[i][Color.BLACK.ordinal()] ;
+            this.blackBitboard |= this.layoutBitboards[i][Color.BLACK.ordinal()] ;
         }
     }
 
 
-    /**
-     * setBitboards performs bitwise operation to put a piece on the board
-     * 
-     * @param pieceType is the type of piece we will update
-     *      i.e Pawn
-     * @param color is the color type of the piece we will update
-     *      i.e Black/White Pawn
-     * @param position is the position from 0-63
-     */
-    public void setBitboards(PieceType pieceType, Color color, int position)
+    public long[][] getPieceMoveBitboards()
     {
-            this.bitboards[pieceType.ordinal()][color.ordinal()] |= (1L << position);
-            // 000000000000...0000000 || 000000010000...0000000 = 000000010000...0000000
+        return this.pieceMoveBitboards ;
     }
+
+    public void setPieceMoveBitboards(int movePosition, PieceType piece, Color color)
+    {
+        this.pieceMoveBitboards[piece.ordinal()][color.ordinal()] |= 1L << movePosition ;
+    }
+
 
     public HashMap<String, String> getBoardInfo()
     {
@@ -276,7 +317,7 @@ public class ChessBoard {
                 char pieceChar = '.';
                 for (PieceType pieceType : PieceType.values()) {
                     for (Color color : Color.values()) {
-                        if ((bitboards[pieceType.ordinal()][color.ordinal()] & (1L << position)) != 0) {
+                        if ((layoutBitboards[pieceType.ordinal()][color.ordinal()] & (1L << position)) != 0) {
                             pieceChar = pieceTypeToChar(pieceType, color);
                             break;
                         }
