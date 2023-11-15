@@ -237,4 +237,29 @@ public class EngineCore {
 
 
     }
+
+    // GETTERS
+    public long[][] getPAWN_MOVE_MASK() {
+        return PAWN_MOVE_MASK;
+    }
+
+    public long[] getROOK_MOVE_MASK() {
+        return ROOK_MOVE_MASK;
+    }
+
+    public long[] getKNIGHT_MOVE_MASK() {
+        return KNIGHT_MOVE_MASK;
+    }
+
+    public long[] getBISHOP_MOVE_MASK() {
+        return BISHOP_MOVE_MASK;
+    }
+
+    public long[] getQUEEN_MOVE_MASK() {
+        return QUEEN_MOVE_MASK;
+    }
+
+    public long[] getKING_MOVE_MASK() {
+        return KING_MOVE_MASK;
+    }
 }

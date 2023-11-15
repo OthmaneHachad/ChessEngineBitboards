@@ -2,6 +2,7 @@ package github.OthmaneHachad;
 
 public class MoveValidator {
     private ChessBoard chessboard ;
+    private EngineCore core ;
 
 
     public MoveValidator(ChessBoard chessboard)
@@ -24,11 +25,24 @@ public class MoveValidator {
 
     public boolean knightMoveLegal(Move move)
     {
-        return true ;
+        // knight doesn't care about obstructing pieces
+        return ( core.getKNIGHT_MOVE_MASK()[move.getStartPosition()]
+                & 1L << (move.getEndPosition()) ) != 0 ;
     }
 
     public boolean bishopMoveLegal(Move move)
     {
+
+        if (
+                ( core.getBISHOP_MOVE_MASK()[move.getStartPosition()]
+                        & 1L << (move.getEndPosition()) ) == 0
+        )
+        {
+            // Means the square is not reachable by piece - unavailable in database
+            System.out.println("Target Square unreachable by piece - not found in db");
+            return false ;
+        }
+
         int startX = (move.getStartPosition() / 8);
         int endX = (move.getEndPosition() / 8);
 
@@ -70,6 +84,18 @@ public class MoveValidator {
 
     public boolean queenMoveLegal(Move move)
     {
+
+        if (
+                ( core.getQUEEN_MOVE_MASK()[move.getStartPosition()]
+                        & 1L << (move.getEndPosition()) ) == 0
+        )
+        {
+            // Means the square is not reachable by piece - unavailable in database
+            System.out.println("Target Square unreachable by piece - not found in db");
+            return false ;
+        }
+
+
         int startX = (move.getStartPosition() / 8);
         int endX = (move.getEndPosition() / 8);
 
@@ -95,6 +121,17 @@ public class MoveValidator {
     }
 
     public boolean rookMoveLegal(Move move) {
+
+        if (
+                ( core.getROOK_MOVE_MASK()[move.getStartPosition()]
+                        & 1L << (move.getEndPosition()) ) == 0
+        )
+        {
+            // Means the square is not reachable by piece - unavailable in database
+            System.out.println("Target Square unreachable by piece - not found in db");
+            return false ;
+        }
+
         int startX = (move.getStartPosition() / 8);
         int endX = (move.getEndPosition() / 8);
 
@@ -140,10 +177,26 @@ public class MoveValidator {
 
     private boolean kingMoveLegal(Move move)
     {
-        return true ;
+        // TODO verify that king NOT in Check in future board
+        if (chessboard.isKingChecked(move.getColor()))
+        {
+            return false ;
+        }
+        return ( core.getKING_MOVE_MASK()[move.getStartPosition()]
+                & 1L << (move.getEndPosition()) ) == 0 ;
     }
 
     public boolean pawnMoveLegal(Move move) {
+
+        if (
+                ( core.getPAWN_MOVE_MASK()[move.getColor().ordinal()][move.getStartPosition()]
+                & 1L << (move.getEndPosition()) ) == 0
+        )
+        {
+            // Means the square is not reachable by piece - unavailable in database
+            System.out.println("Target Square unreachable by piece - not found in db");
+            return false ;
+        }
 
         int positionDifference = move.getEndPosition() - move.getStartPosition() ;
         int direction = move.getColor() == Color.WHITE ? 1 : -1 ;
@@ -173,38 +226,6 @@ public class MoveValidator {
         // TODO: Add checks for en passant and promotion
         return false ;
     }
-    /** OVERLOAD
-     *
-      */
-    public boolean pawnMoveLegal(Move move, PieceType promotionPiece) {
-        int positionDifference = move.getEndPosition() - move.getStartPosition() ;
-        int direction = move.getColor() == Color.WHITE ? 1 : -1 ;
-
-        // Check for basic forward movement
-        if (!(positionDifference == 8 * direction && move.getPieceCaptured() == null))
-        {
-            return true ;
-        }
-
-        // Check for capture movement
-        if (((positionDifference == (7 * direction)) || (positionDifference == (9 * direction)))
-                && (move.getPieceCaptured() != null))
-        {
-            return true  ;
-        }
-
-        // Check for double square forward movement from starting position
-        if ((move.getColor() == Color.WHITE && move.getStartPosition() / 8 == 1
-                || move.getColor() == Color.BLACK && move.getStartPosition() / 8 == 6)
-                && positionDifference == 16 * direction && move.getPieceCaptured() == null) {
-            return true;
-        }
-
-        // TODO: Add checks for en passant and promotion
-        // TODO: Add promotion
-        return false ;
-    }
-
 
     public ChessBoard getChessboard() {
         return this.chessboard;

@@ -1,5 +1,5 @@
 package github.OthmaneHachad;
-
+import java.util.ArrayList ;
 import java.util.HashMap;
 
 
@@ -17,6 +17,7 @@ public class ChessBoard {
 
 
     // creates a 6x2 array of long values (64 bits) - Piece Layout
+    // [piece][color]
     private long[][] layoutBitboards ;
 
     // creates 6x2 array of long values (64bits) - Possible Piece Moves
@@ -28,6 +29,9 @@ public class ChessBoard {
 
     // instance of MoveValidator
     private MoveValidator Judge ;
+
+    // instance of Engine Core
+    private EngineCore Core ;
 
     // constructor to build the default position
     public ChessBoard()
@@ -74,9 +78,43 @@ public class ChessBoard {
         // update bitboards
         this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()] = pieceBitboard ;
 
+        // TODO Update all other relevant info
+            // en passant validities
+            // update king in check --> (both sides)
+            // check stealthmate (nuance between no legal moves and all potental checks)
+
         // TODO: compute and return updated FEN String
 
     }
+
+    public boolean isKingChecked(Color colorOfKing)
+    {
+        // TODO: write test
+        // record the king position
+        // loop over all opposing pieces
+        // check if ANY OpposingPieceIsMoveLegal(kingPosition) -> true
+        // break the loop at first true
+
+        Color opposingColor = colorOfKing == Color.WHITE ? Color.BLACK : Color.WHITE ;
+        int kingPosition = this.getPiecePosition(PieceType.KING, colorOfKing).get(0);
+
+        for (PieceType piece : PieceType.values())
+        {
+            ArrayList<Integer> piecePositions = this.getPiecePosition(piece, opposingColor);
+            for (int position : piecePositions)
+            {
+                if (this.Judge.moveLegal(
+                    new Move(position, kingPosition, piece, opposingColor, PieceType.KING)
+                ))
+                {
+                    return true ;
+                }
+            }
+        }
+
+        return false ;
+    }
+
 
     public PieceType getPieceAt(int position) {
         for (PieceType pieceType : PieceType.values()) {
@@ -88,6 +126,21 @@ public class ChessBoard {
             }
         }
         return null; // No piece found at the given position
+    }
+
+    public ArrayList<Integer> getPiecePosition(PieceType piece, Color color)
+    {
+        // TODO: write test
+        ArrayList<Integer> piecePositions = new ArrayList<Integer>();
+
+        for (int i = 0; i < 64; i++)
+        {
+            if ((this.layoutBitboards[piece.ordinal()][color.ordinal()] & 1L << i) != 0)
+            {
+                piecePositions.add(i); // i is the position at which there is a piece
+            }
+        }
+        return piecePositions ;
     }
 
     public boolean isSquareOccupied(int row, int column)
