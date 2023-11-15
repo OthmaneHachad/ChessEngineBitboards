@@ -22,48 +22,64 @@ public class EngineCore {
         this.KING_MOVE_MASK = new long[64] ;
 
         // generate all masks
-        //this.generateReachableSquares();
+        this.generateReachableSquares();
     }
 
     // TODO: adjust to correctly generate all MASKS
-    public void generateReachableSquares(Color color, int position)
+    public void generateReachableSquares()
     {
-        // method stub
+        for (PieceType piece : PieceType.values())
+        {
+            for (int i = 0; i < 64; i++)
+            {
+                switch (piece)
+                {
+                    case BISHOP: this.BISHOP_MOVE_MASK[i] |= this.generateReachableSquaresBishop(i);
+                    case QUEEN: this.QUEEN_MOVE_MASK[i] |= this.generateReachableSquaresQueen(i);
+                    case ROOK: this.ROOK_MOVE_MASK[i] |= this.generateReachableSquaresRook(i);
+                    case KNIGHT: this.KNIGHT_MOVE_MASK[i] |= this.generateReachableSquaresKnight(i);
+                    case KING: this.KING_MOVE_MASK[i] |= this.generateReachableSquaresKing(i);
+                    case PAWN:
+                        this.PAWN_MOVE_MASK[0][i] |= this.generateReachableSquaresPawn(i, Color.BLACK);
+                        this.PAWN_MOVE_MASK[1][i] |= this.generateReachableSquaresPawn(i, Color.WHITE);
+                }
+            }
+        }
     }
 
-    public long generateReachableSquaresKnight(int position)
-    {
-        long moves = 0L ;
+    public long generateReachableSquaresKnight(int position) {
+        long moves = 0L;
 
         int row = position / 8;
         int column = position % 8;
 
-        // forward Vertical
-        // up left
-        if (row < 6 && column > 0) moves |= 1L << position + 15 ;
-        // up right
-        if (row < 6 && column > 0) moves |= 1L << position + 17 ;
+        // Forward Vertical
+        // Up left
+        if ((row + 2) < 8 && (column - 1) > 0) moves |= 1L << (position + 15);
+        // Up right
+        if ((row + 2) < 8 && (column + 1) < 8) moves |= 1L << (position + 17);
 
-        // backwards Vertical
-        // down right
-        if (row > 1 && column < 7) moves |= 1L << position - 15 ;
-        // down left
-        if (row > 1 && column > 0) moves |= 1L << position - 17 ;
+        // Backward Vertical
+        // Down right
+        if ((row - 2) > 0 && (column + 1) < 8) moves |= 1L << (position - 15);
+        // Down left
+        if ((row - 2) > 0 && (column - 1) > 0) moves |= 1L << (position - 17);
 
-        // forward Horizontal
-        // up left
-        if (row < 7 && column > 1) moves |= 1L << position + 6 ;
-        // up right
-        if (row < 7 && column < 6) moves |= 1L << position + 10 ;
+        // Forward Horizontal
+        // Up left
+        if ((row + 1) < 8 && (column - 2) > 0) moves |= 1L << (position + 6);
+        // Up right
+        if ((row + 1) < 8 && (column + 2) < 8) moves |= 1L << (position + 10);
 
-        // backward Horizontal
-        // down right
-        if (row < 7 && column < 6) moves |= 1L << position - 6 ;
-        // down left
-        if (row > 0 && column > 1) moves |= 1L << position - 10 ;
+        // Backward Horizontal
+        // Down right
+        if ((row - 1) > 0 && (column + 2) < 8) moves |= 1L << (position - 6);
+        // Down left
+        if ((row - 1) > 0 && (column - 2) > 0) moves |= 1L << (position - 10);
 
-        return moves ;
+        return moves;
     }
+
 
     public long generateReachableSquaresBishop(int position) {
         long moves = 0L;
@@ -179,11 +195,43 @@ public class EngineCore {
         }
 
         // forward
-        moves |= 1L << (position + (8*direction)) ;
+        if ((row + (1*direction)) < 8 && (row + (1*direction)) >=0)
+        {
+            moves |= 1L << (position + (8*direction)) ;
+        }
+
 
         // diagonal right/left
-        moves |= 1L << (position + (9*direction)) ;
-        moves |= 1L << (position + (7*direction)) ;
+        if (color == Color.WHITE)
+        {
+            if ((row + 1) < 8 && (column + 1) < 8)
+            {
+                moves |= 1L << (position + (9*direction)) ;
+            }
+
+            if ((row + 1) < 8 && (column - 1) >= 0)
+            {
+                moves |= 1L << (position + (7*direction)) ;
+            }
+        }
+
+        // diagonal right/left
+        if (color == Color.BLACK)
+        {
+            // diagonal left (black perspective)
+            if ((row - 1) >= 0 && (column + 1) < 8)
+            {
+                moves |= 1L << (position + (7*direction)) ;
+            }
+
+            // diagonal right (black perspective)
+            if ((row - 1) >= 0 && (column - 1) >= 0)
+            {
+                moves |= 1L << (position + (9*direction)) ;
+            }
+        }
+
+
 
         return moves ;
 
