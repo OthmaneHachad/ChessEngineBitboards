@@ -8,6 +8,7 @@ public class MoveValidator {
     public MoveValidator(ChessBoard chessboard)
     {
         this.chessboard = chessboard ;
+        this.core = new EngineCore();
     }
 
     public boolean moveLegal(Move move)
@@ -177,9 +178,11 @@ public class MoveValidator {
 
     private boolean kingMoveLegal(Move move)
     {
-        // TODO verify that king NOT in Check in future board
+        // update board with potential move
+        this.chessboard.movePiece(move);
         if (chessboard.isKingChecked(move.getColor()))
         {
+            // TODO: add chessboard undo move
             return false ;
         }
         return ( core.getKING_MOVE_MASK()[move.getStartPosition()]
@@ -223,7 +226,6 @@ public class MoveValidator {
             return true;
         }
 
-        // TODO: Add checks for en passant and promotion
         return false ;
     }
 

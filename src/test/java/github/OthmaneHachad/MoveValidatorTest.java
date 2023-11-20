@@ -101,8 +101,6 @@ class MoveValidatorTest {
         Move blockedUp = new Move(27, 60, PieceType.ROOK, Color.WHITE, null); // Assuming move from d4 to d9 (invalid move)
         assertEquals(false, validator.rookMoveLegal(blockedUp));
 
-        // failed tests TODO: FIX THIS TEST
-
         Move verticalUp1 = new Move(27, 35, PieceType.ROOK, Color.WHITE, null); // Assuming move from d4 to d8
         assertEquals(true, validator.rookMoveLegal(verticalUp1));
 

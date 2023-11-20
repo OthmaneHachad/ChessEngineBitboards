@@ -12,10 +12,6 @@ import java.util.HashMap;
  */
 public class ChessBoard {
 
-    //EngineCore reference
-    EngineCore engine ;
-
-
     // creates a 6x2 array of long values (64 bits) - Piece Layout
     // [piece][color]
     private long[][] layoutBitboards ;
@@ -30,8 +26,11 @@ public class ChessBoard {
     // instance of MoveValidator
     private MoveValidator Judge ;
 
-    // instance of Engine Core
-    private EngineCore Core ;
+
+
+    // board info
+    public boolean isWhiteKingChecked ;
+    public boolean isBlackKingChecked ;
 
     // constructor to build the default position
     public ChessBoard()
@@ -43,6 +42,10 @@ public class ChessBoard {
         this.setWhiteBitboard();
         this.setBlackBitboard();
         Judge = new MoveValidator(this);
+
+        // known starting position
+        this.isWhiteKingChecked = false ;
+        this.isBlackKingChecked = false ;
     }
 
     // constructor to build a specific position
@@ -55,6 +58,10 @@ public class ChessBoard {
 
         this.setWhiteBitboard();
         this.setBlackBitboard();
+        Judge = new MoveValidator(this);
+
+        this.isWhiteKingChecked = this.isKingChecked(Color.WHITE);
+        this.isBlackKingChecked = this.isKingChecked(Color.BLACK);
     }
 
 
@@ -62,6 +69,7 @@ public class ChessBoard {
     public void movePiece(Move move)
     {
 
+        // Moving Piece
         // first OR operation with Piece bitboard
         long pieceBitboard = this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()];
 
@@ -74,28 +82,59 @@ public class ChessBoard {
         // fill end position - setLayoutBitboards()
         pieceBitboard = pieceBitboard | endPositionBitMask ;
 
+        // for potential captured piece
+        if (move.getPieceCaptured() != null)
+        {
+            System.out.println("starting updating process for captured piece");
+            Color c = move.getColor() == Color.WHITE ? Color.BLACK : Color.WHITE ;
+            long capturedPieceBitboard = this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][c.ordinal()];
+            long removePieceBitboard = ~(1L << move.getEndPosition()) ;
 
-        // update bitboards
+            capturedPieceBitboard &= removePieceBitboard ;
+            this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][c.ordinal()] = capturedPieceBitboard ;
+
+        }
+        // update moving piece bitboard
         this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()] = pieceBitboard ;
 
-        // TODO Update all other relevant info
-            // en passant validities
-            // update king in check --> (both sides)
-            // check stealthmate (nuance between no legal moves and all potental checks)
+        // update color bitboards
+        this.setWhiteBitboard();
+        this.setBlackBitboard();
 
-        // TODO: compute and return updated FEN String
+
+            // TODO : en passant validities movePiece()
+
+            // update king in check --> (both sides)
+        this.isWhiteKingChecked = this.isKingChecked(Color.WHITE);
+        this.isBlackKingChecked = this.isKingChecked(Color.BLACK);
+
+            // check stealthmate (nuance between no legal moves and all potental checks)
+        this.isKingStealthMate();
+
+        // TODO: update FEN String after moving piece .movePiece()
+
+
 
     }
 
+    public void undoMove(Move move)
+    {
+        // TODO: implement undoMove()
+    }
+
+    public void isKingStealthMate() {
+        // TODO: implement StealthMate()
+    }
+
+
     public boolean isKingChecked(Color colorOfKing)
     {
-        // TODO: write test
         // record the king position
         // loop over all opposing pieces
         // check if ANY OpposingPieceIsMoveLegal(kingPosition) -> true
         // break the loop at first true
 
-        Color opposingColor = colorOfKing == Color.WHITE ? Color.BLACK : Color.WHITE ;
+        Color opposingColor = (colorOfKing == Color.WHITE) ? Color.BLACK : Color.WHITE ;
         int kingPosition = this.getPiecePosition(PieceType.KING, colorOfKing).get(0);
 
         for (PieceType piece : PieceType.values())
@@ -103,12 +142,25 @@ public class ChessBoard {
             ArrayList<Integer> piecePositions = this.getPiecePosition(piece, opposingColor);
             for (int position : piecePositions)
             {
-                if (this.Judge.moveLegal(
-                    new Move(position, kingPosition, piece, opposingColor, PieceType.KING)
-                ))
+
+                if (piece == PieceType.KING)
                 {
-                    return true ;
+                    if ((EngineCore.getKING_MOVE_MASK()[position]
+                            & 1L << (kingPosition) ) != 0)
+                    {
+                        return true ;
+                    }
                 }
+                else
+                {
+                    if (this.Judge.moveLegal(
+                            new Move(position, kingPosition, piece, opposingColor, PieceType.KING)
+                    ))
+                    {
+                        return true ;
+                    }
+                }
+
             }
         }
 
@@ -130,7 +182,6 @@ public class ChessBoard {
 
     public ArrayList<Integer> getPiecePosition(PieceType piece, Color color)
     {
-        // TODO: write test
         ArrayList<Integer> piecePositions = new ArrayList<Integer>();
 
         for (int i = 0; i < 64; i++)
@@ -161,11 +212,11 @@ public class ChessBoard {
         long colorBitboard = color == Color.WHITE ? this.getWhiteBitboard() : this.getBlackBitboard() ;
 
         // perform bitwise AND with 1L << position of the x,y
-        long newColorBitboard = colorBitboard | 1L << (x * 8 + y);
+        long newColorBitboard = colorBitboard & 1L << (x * 8 + y);
 
         // if bitboard decimal value has changed, it is not the same color
-        return newColorBitboard == colorBitboard ;
-        // TODO: test this method
+        return newColorBitboard != 0 ;
+
     }
 
     /**
@@ -199,7 +250,6 @@ public class ChessBoard {
                     // Otherwise, update the bitboards
                     Color c = Character.isLowerCase(ch) ? Color.BLACK : Color.WHITE;
                     setPiece(charToPieceType(ch), c, r, column);
-                    // TODO: Update the piece's reachable squares bitboard
                     column++;  // Increment the column counter
                 }
             }
@@ -360,6 +410,8 @@ public class ChessBoard {
     {
         this.boardInfo = this.parseFen(fen);
     }
+
+
 
     @Override
     public String toString() {

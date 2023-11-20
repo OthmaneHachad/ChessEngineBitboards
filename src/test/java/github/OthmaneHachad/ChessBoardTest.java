@@ -197,40 +197,185 @@ class ChessBoardTest {
 
     @Test
     void testIsSquareOccupiedFalse() {
-        // TODO: Implement this test
         boolean squareOccupied  = chessBoard.isSquareOccupied(3,3);
         assertEquals(false, squareOccupied);
     }
 
     @Test
     void testIsSquareOccupiedTrue() {
-        // TODO: Implement this test
         boolean squareOccupied  = chessBoard.isSquareOccupied(0,3);
         assertEquals(true, squareOccupied);
     }
 
+
+    @Test
+    void testIsKingChecked() {
+
+        // Outline:
+            // one case per piece per color
+            // total of 11 tests
+
+        // Black King Checked
+        // By queen
+        ChessBoard cb_1 = new ChessBoard("3q4/r1p5/1p2P1N1/1R5K/2P2r2/Pp2n3/1Q1kP3/8 w - - 0 1");
+        assertEquals(true, cb_1.isKingChecked(Color.BLACK));
+        assertEquals(false, cb_1.isKingChecked(Color.WHITE));
+
+        // by rook
+        ChessBoard cb_2 = new ChessBoard("3q4/r1p5/1p2P1N1/1R5K/2P2r2/Pp2n3/1R1kP3/8 w - - 0 1");
+        assertEquals(true, cb_2.isKingChecked(Color.BLACK));
+        assertEquals(false, cb_2.isKingChecked(Color.WHITE));
+
+        // by bishop
+        ChessBoard cb_3 = new ChessBoard("3q4/r1p5/1p2P1N1/1R5K/1BP2r2/Pp2n3/1r1kP3/8 w - - 0 1");
+        assertEquals(true, cb_3.isKingChecked(Color.BLACK));
+        assertEquals(false, cb_3.isKingChecked(Color.WHITE));
+
+        // by knight
+        ChessBoard cb_4 = new ChessBoard("3q4/r1p5/1p2P1N1/1R5K/1BP2r2/Pp3N2/1r1kP3/8 w - - 0 1");
+        assertEquals(true, cb_4.isKingChecked(Color.BLACK));
+        assertEquals(false, cb_4.isKingChecked(Color.WHITE));
+
+        // by pawn
+        ChessBoard cb_5 = new ChessBoard("3q4/r1p5/1p2P1N1/1R5K/1BP2r2/Pp1k1N2/1r2P3/8 w - - 0 1");
+        assertEquals(true, cb_5.isKingChecked(Color.BLACK));
+        assertEquals(false, cb_5.isKingChecked(Color.WHITE));
+
+        // ---------------------------------------------------------------------------
+
+        // White King Checked
+        // By queen
+        ChessBoard cb_7 = new ChessBoard("3Q4/r1p5/1p2P1N1/7k/2P2r2/Pp2n3/1q1KP3/8 w - - 0 1");
+        assertEquals(false, cb_7.isKingChecked(Color.BLACK));
+        assertEquals(true, cb_7.isKingChecked(Color.WHITE));
+
+        // by rook
+        ChessBoard cb_8 = new ChessBoard("3Q4/r1p5/1p2P1N1/7k/2P2r2/Pp2n3/1r1KP3/8 w - - 0 1");
+        assertEquals(false, cb_8.isKingChecked(Color.BLACK));
+        assertEquals(true, cb_8.isKingChecked(Color.WHITE));
+
+        // by bishop
+        ChessBoard cb_9 = new ChessBoard("3Q4/r1p5/1p2P1N1/7k/1bP2r2/Pp2n3/1R1KP3/8 w - - 0 1");
+        assertEquals(false, cb_9.isKingChecked(Color.BLACK));
+        assertEquals(true, cb_9.isKingChecked(Color.WHITE));
+
+        // by knight
+        ChessBoard cb_10 = new ChessBoard("3Q4/r1p5/1p2P1N1/7k/1BP2r2/Pp3n2/1R1KP3/8 w - - 0 1");
+        assertEquals(false, cb_10.isKingChecked(Color.BLACK));
+        assertEquals(true, cb_10.isKingChecked(Color.WHITE));
+
+        // by pawn
+        ChessBoard cb_11 = new ChessBoard("3Q4/r1p5/1p2P1N1/7k/1Bp2r2/Pp1K1N2/1r2P3/8 w - - 0 1");
+        assertEquals(false, cb_11.isKingChecked(Color.BLACK));
+        assertEquals(true, cb_11.isKingChecked(Color.WHITE));
+
+        //EDGE cases
+        // by opposite king
+        ChessBoard cb_6 = new ChessBoard("3q4/r1p5/1p2P1N1/1R5K/1BP2rk1/Pp3N2/1r2P3/8 w - - 0 1");
+        assertEquals(true, cb_6.isKingChecked(Color.BLACK));
+        assertEquals(true, cb_6.isKingChecked(Color.WHITE));
+
+
+
+
+        //fail("Not yet implemented");
+    }
+
+
     @Test
     void testIsSameColor() {
-        // TODO: Implement this test
-        //fail("Not yet implemented");
+        ChessBoard cb = new ChessBoard("3Q4/r1p5/1p2P1N1/7k/1Bp2r2/Pp1K1N2/1r2P3/8 w - - 0 1");
+        boolean notSameColor = cb.isSameColor(1, 1, Color.WHITE);
+        boolean sameColor = cb.isSameColor(1, 1, Color.BLACK);
+
+        assertEquals(false, notSameColor);
+        assertEquals(true, sameColor);
     }
 
     @Test
     void testMovePiece()
     {
-        // TODO: Implement this test
-        //fail("Not yet implemented");
+        EngineCore engine = new EngineCore() ;
+        ChessBoard cb = new ChessBoard("8/3K2k1/1B1pP3/5B2/1pp3p1/3nPNn1/1b6/q2b4 w - - 0 1");
+        Move wBishopCaptureBKnight = new Move(37, 19, PieceType.BISHOP, Color.WHITE, PieceType.KNIGHT);
+
+        long wBishopBefore = cb.getLayoutBitboards()[PieceType.BISHOP.ordinal()][Color.WHITE.ordinal()];
+        long bKnightBefore = cb.getLayoutBitboards()[PieceType.KNIGHT.ordinal()][Color.BLACK.ordinal()];
+
+        long whitePiecesBefore = cb.getWhiteBitboard() ;
+        long blackPiecesBefore = cb.getBlackBitboard() ;
+
+        cb.movePiece(wBishopCaptureBKnight);
+
+        long wBishopAfter = cb.getLayoutBitboards()[PieceType.BISHOP.ordinal()][Color.WHITE.ordinal()];
+        long bKnightAfter = cb.getLayoutBitboards()[PieceType.KNIGHT.ordinal()][Color.BLACK.ordinal()];
+
+        long whitePiecesAfter = cb.getWhiteBitboard() ;
+        long blackPiecesAfter = cb.getBlackBitboard() ;
+
+        // TODO: Implement this test testMovePiece
+        // 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L
+        // 0b00000000_00000000_00000000_00000010_00000000_00001000_00000000_00000000L
+        // assert moving piece layout bitboard updated
+
+        // Bishop
+        assertEquals(
+                0b00000000_00000000_00000010_00100000_00000000_00000000_00000000_00000000L,
+                wBishopBefore
+        );
+        assertEquals(
+                0b00000000_00000000_00000010_00000000_00000000_00001000_00000000_00000000L,
+                wBishopAfter
+        );
+
+        //Knight
+        assertEquals(
+                0b00000000_00000000_00000000_00000000_00000000_01001000_00000000_00000000L,
+                bKnightBefore
+        );
+        assertEquals(
+                0b00000000_00000000_00000000_00000000_00000000_01000000_00000000_00000000L,
+                bKnightAfter
+        );
+
+        // all white pieces
+        assertEquals(
+                0b00000000_00001000_00010010_00100000_00000000_00110000_00000000_00000000L,
+                whitePiecesBefore
+        );
+        assertEquals(
+                0b00000000_00001000_00010010_00000000_00000000_00111000_00000000_00000000L,
+                whitePiecesAfter
+        );
+
+        // all black pieces
+        assertEquals(
+                0b00000000_01000000_00001000_00000000_01000110_01001000_00000010_00001001L,
+                blackPiecesBefore
+        );
+        assertEquals(
+                0b00000000_01000000_00001000_00000000_01000110_01000000_00000010_00001001L,
+                blackPiecesAfter
+        );
+
+        // assert color bitboard has been updated
+        // if a piece was captured
+            // assert piece layout bitboard updated
+            // assert color bitboard has been updated
+        // assert that the kings are in the correct check states
+        // assert the FEN data updates are correct
+
     }
 
     @Test
     void testSetWhiteBitboard() {
-        // TODO: Implement this test
+        // TODO: Implement this test testSetWhiteBitboard
         //fail("Not yet implemented");
     }
 
     @Test
     void testSetBlackBitboard() {
-        // TODO: Implement this test
+        // TODO: Implement this test testSetBlackBitboard
         //fail("Not yet implemented");
     }
 

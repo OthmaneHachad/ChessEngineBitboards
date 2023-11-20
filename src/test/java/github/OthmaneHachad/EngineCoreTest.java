@@ -17,7 +17,6 @@ class EngineCoreTest {
     @Test
     void testGenerateReachableSquaresKnight()
     {
-        // TODO: FIX ERRORS IN ASSERTIONS
         // 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L
         long reachableSquaresKnight = engine.generateReachableSquaresKnight(35);
         // 00000000 00010100 00100000 00000000 00100010 00010100 00000000 00000000
@@ -174,7 +173,6 @@ class EngineCoreTest {
     @Test
     void testGenerateReachableSquaresKing()
     {
-        // TODO: add edge cases
         // 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L
         long reachableSquaresKing = engine.generateReachableSquaresKing(35);
         assertEquals(
@@ -211,7 +209,6 @@ class EngineCoreTest {
     @Test
     void testGenerateReachableSquarePawn()
     {
-        // TODO: FIX edge cases
         // 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L
         long reachableSquaresPawn = engine.generateReachableSquaresPawn(35, Color.WHITE);
         assertEquals(

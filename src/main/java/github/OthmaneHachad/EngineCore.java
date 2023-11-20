@@ -3,12 +3,12 @@ package github.OthmaneHachad;
 public class EngineCore {
 
     // private
-    private long[][] PAWN_MOVE_MASK ;
-    private long[] ROOK_MOVE_MASK ;
-    private long[] KNIGHT_MOVE_MASK ;
-    private long[] BISHOP_MOVE_MASK ;
-    private long[] QUEEN_MOVE_MASK ;
-    private long[] KING_MOVE_MASK ;
+    private static long[][] PAWN_MOVE_MASK ;
+    private static long[] ROOK_MOVE_MASK ;
+    private static long[] KNIGHT_MOVE_MASK ;
+    private static long[] BISHOP_MOVE_MASK ;
+    private static long[] QUEEN_MOVE_MASK ;
+    private static long[] KING_MOVE_MASK ;
 
 
 
@@ -25,7 +25,6 @@ public class EngineCore {
         this.generateReachableSquares();
     }
 
-    // TODO: adjust to correctly generate all MASKS
     public void generateReachableSquares()
     {
         for (PieceType piece : PieceType.values())
@@ -176,7 +175,6 @@ public class EngineCore {
     public long generateReachableSquaresPawn(int position, Color color)
     {
         // TODO: add en passant
-        // TODO: fix pawn reachable squares
         // setPieceMoveBitboards
         long moves = 0L ;
         int direction = color == Color.WHITE ? 1 : -1 ;
@@ -239,27 +237,27 @@ public class EngineCore {
     }
 
     // GETTERS
-    public long[][] getPAWN_MOVE_MASK() {
+    public static long[][] getPAWN_MOVE_MASK() {
         return PAWN_MOVE_MASK;
     }
 
-    public long[] getROOK_MOVE_MASK() {
+    public static long[] getROOK_MOVE_MASK() {
         return ROOK_MOVE_MASK;
     }
 
-    public long[] getKNIGHT_MOVE_MASK() {
+    public static long[] getKNIGHT_MOVE_MASK() {
         return KNIGHT_MOVE_MASK;
     }
 
-    public long[] getBISHOP_MOVE_MASK() {
+    public static long[] getBISHOP_MOVE_MASK() {
         return BISHOP_MOVE_MASK;
     }
 
-    public long[] getQUEEN_MOVE_MASK() {
+    public static long[] getQUEEN_MOVE_MASK() {
         return QUEEN_MOVE_MASK;
     }
 
-    public long[] getKING_MOVE_MASK() {
+    public static long[] getKING_MOVE_MASK() {
         return KING_MOVE_MASK;
     }
 }
