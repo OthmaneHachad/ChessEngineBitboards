@@ -368,6 +368,59 @@ class ChessBoardTest {
     }
 
     @Test
+    void testUndoMove()
+    {
+        // TODO: fix copying issue when retrieving game states etc
+        EngineCore engine = new EngineCore() ;
+        ChessBoard cb = new ChessBoard("8/3K2k1/1B1pP3/5B2/1pp3p1/3nPNn1/1b6/q2b4 w - - 0 1");
+        Move wBishopCaptureBKnight = new Move(37, 19, PieceType.BISHOP, Color.WHITE, PieceType.KNIGHT);
+
+        long whitePiecesBefore = cb.getWhiteBitboard() ;
+        long blackPiecesBefore = cb.getBlackBitboard() ;
+
+        long bishopBitboard = cb.getLayoutBitboards()[PieceType.BISHOP.ordinal()][Color.WHITE.ordinal()];
+        long knightBitboard = cb.getLayoutBitboards()[PieceType.KNIGHT.ordinal()][Color.BLACK.ordinal()];
+
+        // make the move
+        cb.movePiece(wBishopCaptureBKnight);
+
+        long whitePiecesAfter = cb.getWhiteBitboard() ;
+        long blackPiecesAfter = cb.getBlackBitboard() ;
+
+
+
+        // undo the move
+        cb.undoMove();
+
+
+
+        // all white pieces
+        assertEquals(
+                0b00000000_00001000_00010010_00100000_00000000_00110000_00000000_00000000L,
+                cb.getWhiteBitboard()
+        );
+
+        // all black pieces
+        assertEquals(
+                0b00000000_01000000_00001000_00000000_01000110_01001000_00000010_00001001L,
+                cb.getBlackBitboard()
+        );
+
+        assertEquals(
+                bishopBitboard,
+                cb.getLayoutBitboards()[PieceType.BISHOP.ordinal()][Color.WHITE.ordinal()]
+        );
+
+        assertEquals(
+                knightBitboard,
+                cb.getLayoutBitboards()[PieceType.KNIGHT.ordinal()][Color.BLACK.ordinal()]
+        );
+
+
+    }
+
+
+    @Test
     void testSetWhiteBitboard() {
         // TODO: Implement this test testSetWhiteBitboard
         //fail("Not yet implemented");

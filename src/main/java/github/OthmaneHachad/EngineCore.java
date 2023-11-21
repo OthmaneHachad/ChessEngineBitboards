@@ -260,4 +260,13 @@ public class EngineCore {
     public static long[] getKING_MOVE_MASK() {
         return KING_MOVE_MASK;
     }
+
+    public static long[][] deepCopyBitboards(long[][] original)
+    {
+        long[][] copy = new long[original.length][];
+        for (int i = 0; i < original.length; i++) {
+            copy[i] = original[i].clone();
+        }
+        return copy;
+    }
 }

@@ -1,6 +1,7 @@
 package github.OthmaneHachad;
 import java.util.ArrayList ;
 import java.util.HashMap;
+import java.util.Stack;
 
 
 /**
@@ -21,16 +22,17 @@ public class ChessBoard {
 
     private long whiteBitboard ;
     private long blackBitboard ;
+    private Stack<GameState> boardHistory ;
     private HashMap<String, String> boardInfo ;
 
     // instance of MoveValidator
     private MoveValidator Judge ;
 
-
-
     // board info
     public boolean isWhiteKingChecked ;
     public boolean isBlackKingChecked ;
+
+
 
     // constructor to build the default position
     public ChessBoard()
@@ -46,6 +48,8 @@ public class ChessBoard {
         // known starting position
         this.isWhiteKingChecked = false ;
         this.isBlackKingChecked = false ;
+
+        this.boardHistory = new Stack<GameState>() ;
     }
 
     // constructor to build a specific position
@@ -62,12 +66,16 @@ public class ChessBoard {
 
         this.isWhiteKingChecked = this.isKingChecked(Color.WHITE);
         this.isBlackKingChecked = this.isKingChecked(Color.BLACK);
+
+        this.boardHistory = new Stack<GameState>() ;
     }
 
 
 
     public void movePiece(Move move)
     {
+        // Save the current board state
+        this.saveCurrentState();
 
         // Moving Piece
         // first OR operation with Piece bitboard
@@ -117,9 +125,35 @@ public class ChessBoard {
 
     }
 
-    public void undoMove(Move move)
+    public void saveCurrentState()
+    {
+        // TODO : implement saveCurrentState()
+        GameState state = new GameState(this.getLayoutBitboards(), this.getWhiteBitboard(),
+                this.getBlackBitboard(), this.boardHistory, this.isWhiteKingChecked, this.isBlackKingChecked);
+        this.boardHistory.push(state);
+    }
+
+    public GameState restorePreviousState()
+    {
+        // TODO : implement restorePreviousState()
+        GameState state = this.boardHistory.pop();
+
+        this.layoutBitboards = EngineCore.deepCopyBitboards(state.getLayoutBitboards()) ;
+        this.whiteBitboard = state.getWhiteBitboard() ;
+        this.blackBitboard = state.getBlackBitboard() ;
+        this.isWhiteKingChecked = state.isWhiteKingChecked() ;
+        this.isBlackKingChecked = state.isBlackKingChecked() ;
+
+        return state ;
+    }
+
+    public void undoMove()
     {
         // TODO: implement undoMove()
+        if (!boardHistory.isEmpty())
+        {
+            this.restorePreviousState() ;
+        }
     }
 
     public void isKingStealthMate() {
@@ -414,7 +448,8 @@ public class ChessBoard {
 
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         String boardToString = "" ;
         for (int row = 0; row < 8 ; row++) { // Start from the top row (black's side)
             for (int col = 0; col < 8; col++) {
@@ -422,7 +457,8 @@ public class ChessBoard {
                 char pieceChar = '.';
                 for (PieceType pieceType : PieceType.values()) {
                     for (Color color : Color.values()) {
-                        if ((layoutBitboards[pieceType.ordinal()][color.ordinal()] & (1L << position)) != 0) {
+                        if ((layoutBitboards[pieceType.ordinal()][color.ordinal()] & (1L << position)) != 0)
+                        {
                             pieceChar = pieceTypeToChar(pieceType, color);
                             break;
                         }

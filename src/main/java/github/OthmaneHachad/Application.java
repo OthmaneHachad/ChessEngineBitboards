@@ -13,5 +13,14 @@ public class Application {
         chessboard.movePiece(pawnMove);
 
         System.out.println(chessboard);
+
+        // undo move
+        chessboard.undoMove() ;
+
+        // print again board
+
+        System.out.println(chessboard);
+
+
     }
 }
