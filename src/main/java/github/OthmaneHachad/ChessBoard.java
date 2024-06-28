@@ -10,6 +10,8 @@ import java.util.Stack;
  *      - board is represented from top (black pieces) to bottom (white pieces)
  *      - in terms of bitboard, white pieces are lower values while black pieces are higher values
  *          - following this pattern, we don't have position attribution issues
+ *
+ *          This implementation indexes squares from 0 - 63, bottom left to top right
  */
 public class ChessBoard {
 
@@ -18,6 +20,7 @@ public class ChessBoard {
     private long[][] layoutBitboards ;
 
     // creates 6x2 array of long values (64bits) - Possible Piece Moves
+    // will be used in move generation ???
     private long[][] pieceMoveBitboards ;
 
     private long whiteBitboard ;
@@ -32,9 +35,9 @@ public class ChessBoard {
     public boolean isWhiteKingChecked ;
     public boolean isBlackKingChecked ;
 
-    // en passant bitboards for Pawns - the 1s represent the pawns elegible
-            // to be performed en passant ON
-    public long[] eligibleEnPassantPawns ;
+    private int enPassantTargetSquare ;  // -1 will signify that there's no en passant target.
+    private Color enPassantTargetColor ;  // To track the color of the pawn that moved two squares.
+
 
 
 
@@ -54,11 +57,6 @@ public class ChessBoard {
         this.isWhiteKingChecked = false ;
         this.isBlackKingChecked = false ;
 
-        this.eligibleEnPassantPawns = new long[Color.values().length];
-        this.eligibleEnPassantPawns[Color.BLACK.ordinal()] =
-                0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L ;
-        this.eligibleEnPassantPawns[Color.WHITE.ordinal()] =
-                0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L ;
 
         this.boardHistory = new Stack<GameState>() ;
     }
@@ -101,7 +99,7 @@ public class ChessBoard {
 
 
 
-    public void movePiece(Move move)
+    public void movePiece2(Move move)
     {
         // Save the current board state
         this.saveCurrentState();
@@ -122,7 +120,7 @@ public class ChessBoard {
         // for potential captured piece
         if (move.getPieceCaptured() != null)
         {
-            //System.out.println("starting updating process for captured piece");
+            System.out.println("capturing piece...");
             Color c = move.getColor() == Color.WHITE ? Color.BLACK : Color.WHITE ;
             long capturedPieceBitboard = this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][c.ordinal()];
             long removePieceBitboard = ~(1L << move.getEndPosition()) ;
@@ -131,6 +129,7 @@ public class ChessBoard {
             this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][c.ordinal()] = capturedPieceBitboard ;
 
         }
+
         // update moving piece bitboard
         this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()] = pieceBitboard ;
 
@@ -139,7 +138,7 @@ public class ChessBoard {
         this.setBlackBitboard();
 
 
-            // TODO : en passant validities movePiece()
+        // TODO : en passant validities movePiece()
 
             // update king in check --> (both sides)
         this.isWhiteKingChecked = this.isKingChecked(Color.WHITE);
@@ -150,14 +149,61 @@ public class ChessBoard {
 
         // TODO: update FEN String after moving piece .movePiece()
 
+        // reset en passant at the end of the move
+        this.resetEnPassant() ;
 
 
+
+    }
+
+    public void movePiece(Move move) {
+        // Save the current board state
+        this.saveCurrentState();
+
+
+        // Update bitboards directly for the piece moving
+        this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()]
+                &= ~(1L << move.getStartPosition());  // Clear the start position
+        this.getLayoutBitboards()[move.getPiece().ordinal()][move.getColor().ordinal()]
+                |= (1L << move.getEndPosition());     // Set the end position
+
+        // Handle captures
+        if (move.getPieceCaptured() != null) {
+            System.out.println("Capturing piece...") ;
+            Color capturedPieceColor = move.getColor() == Color.WHITE ? Color.BLACK: Color.WHITE ;
+            System.out.println("endPosition: " + move.getEndPosition()) ;
+            System.out.println("en passant target: " + this.getEnPassantTargetSquare()) ;
+            if (move.getPieceCaptured() == PieceType.PAWN && move.getEndPosition() == this.enPassantTargetSquare) {
+                // Specific bit clearing for en passant capture
+                System.out.println("its En Passant move !") ;
+                int capturedPosition = move.getColor() == Color.WHITE ? move.getEndPosition() - 8 : move.getEndPosition() + 8;
+                System.out.println("CAPTURED POSITION: " + capturedPosition);
+                this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][capturedPieceColor.ordinal()] &= ~(1L << capturedPosition);  // Clear the actual pawn position in en passant
+            } else {
+                this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][capturedPieceColor.ordinal()]
+                        &= ~(1L << move.getEndPosition());  // Clear the captured piece position normally
+            }
+        }
+
+        // Update color bitboards and check for checks
+        this.setWhiteBitboard();
+        this.setBlackBitboard();
+        this.isWhiteKingChecked = this.isKingChecked(Color.WHITE);
+        this.isBlackKingChecked = this.isKingChecked(Color.BLACK);
+        this.isKingStealthMate();
+
+        // Update FEN String after moving piece if needed
+        // this.updateFenString();
+
+        // Always reset en passant at the end of the move
+        this.resetEnPassant();
     }
 
     public void saveCurrentState()
     {
         GameState state = new GameState(this.getLayoutBitboards(), this.getWhiteBitboard(),
-                this.getBlackBitboard(), this.boardHistory, this.isWhiteKingChecked, this.isBlackKingChecked);
+                this.getBlackBitboard(), this.boardHistory, this.isWhiteKingChecked, this.isBlackKingChecked,
+                this.enPassantTargetSquare, this.enPassantTargetColor);
         this.boardHistory.push(state);
     }
 
@@ -180,6 +226,11 @@ public class ChessBoard {
         {
             this.restorePreviousState() ;
         }
+    }
+
+    public void resetEnPassant() {
+        this.enPassantTargetSquare = -1;  // Reset the target square
+        this.enPassantTargetColor = null; // Reset the target color
     }
 
     public void isKingStealthMate() {
@@ -284,7 +335,7 @@ public class ChessBoard {
      *      starting position
      */
     public void setupStartingPosition(){
-        setupPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        this.setupPosition("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         this.setBoardInfo("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
@@ -295,7 +346,27 @@ public class ChessBoard {
      */
     public void setupPosition(String fen) {
         // Parse the FEN string to translate correctly to the 64 bitboard
-        String[] board = this.parseFen(fen).get("board_layout").split("/");
+        HashMap<String, String> fenData = this.parseFen(fen) ;
+        String[] board = fenData.get("board_layout").split("/");
+        String enPassant = fenData.get("en_passant") ;
+
+        System.out.println("This is the enPassant data: "  + enPassant) ;
+
+        // Parse en passant target if present
+        if (!enPassant.equals("-")) {
+            System.out.println("setting en passant target square...") ;
+            this.enPassantTargetSquare = this.algebraicToIndex(enPassant);
+            System.out.println(this.enPassantTargetSquare) ;
+            // Based on row position, decide color
+            this.enPassantTargetColor = (this.enPassantTargetSquare / 8 == 2) ? Color.BLACK : Color.WHITE;
+        } else {
+            // Reset en passant target
+            this.enPassantTargetSquare = -1; // Reset to no target
+            this.enPassantTargetColor = null; // No color since no target
+        }
+
+
+
         for (int r = 0; r < board.length; r++) {
             // s initialized at 7 because black pieces at the top values
             int column = 0;  // Initialize column counter
@@ -314,6 +385,18 @@ public class ChessBoard {
                 }
             }
         }
+
+
+    }
+
+    /**
+     * Convert algebraic chess notation (e.g., "e3") to a board index.
+     * Here, 'a1' is 0, and 'h8' is 63, increasing from left to right, bottom to top.
+     */
+    private int algebraicToIndex(String pos) {
+        int file = pos.charAt(0) - 'a';  // 'a' becomes 0, 'b' becomes 1, etc.
+        int rank = Character.getNumericValue(pos.charAt(1)) - 1; // '1' becomes 0, '2' becomes 1, etc.
+        return rank * 8 + (file - 1);  // Calculate index from bottom left corner 'a1'
     }
 
 
@@ -469,6 +552,15 @@ public class ChessBoard {
     public void setBoardInfo(String fen)
     {
         this.boardInfo = this.parseFen(fen);
+    }
+
+
+    public int getEnPassantTargetSquare() {
+        return enPassantTargetSquare;
+    }
+
+    public Color getEnPassantTargetColor() {
+        return enPassantTargetColor;
     }
 
 

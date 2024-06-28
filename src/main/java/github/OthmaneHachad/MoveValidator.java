@@ -208,14 +208,14 @@ public class MoveValidator {
         )
         {
             // Means the square is not reachable by piece - unavailable in database
-            //System.out.println("Target Square unreachable by piece - not found in db");
+            //System.out.println("Target Square unreachable by piece - not found in Core");
             return false ;
         }
 
         int positionDifference = move.getEndPosition() - move.getStartPosition() ;
         int direction = move.getColor() == Color.WHITE ? 1 : -1 ;
 
-        System.out.println("positionDifference: " +positionDifference + " | direction: " + direction);
+        System.out.println("positionDifference: " + positionDifference + " | direction: " + direction);
 
         // Check for basic forward movement
         if ((positionDifference == 8 * direction && move.getPieceCaptured() == null))
@@ -227,7 +227,15 @@ public class MoveValidator {
         if (((positionDifference == (7 * direction)) || (positionDifference == (9 * direction)))
                 && (move.getPieceCaptured() != null))
         {
-            return true  ;
+
+            // En passant capture
+            if (chessboard.getEnPassantTargetSquare() == move.getEndPosition() &&
+                    (Math.abs(move.getStartPosition() / 8) - (move.getEndPosition() / 8)) == 1) { // Ensure it's a diagonal move
+                return move.getColor() != chessboard.getEnPassantTargetColor(); // Ensure correct opposing pawn
+            }
+
+            // Regular capture
+            return !chessboard.isSameColor(move.getEndPosition() / 8, move.getEndPosition() % 8, move.getColor());
         }
 
         // Check for double square forward movement from starting position

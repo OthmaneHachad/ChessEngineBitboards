@@ -17,8 +17,14 @@ public class GameState {
 
     private Stack<GameState> boardHistory ;
 
+    // En passant specific fields
+    private int enPassantTargetSquare;  // Position where an en passant capture can occur
+    private Color enPassantTargetColor; // Color of the pawn that moved two squares
+
+
     public GameState(long[][] layoutBitboards, long wBitboard, long bBitboard,
-                     Stack<GameState> boardHistory, boolean whiteKChecked, boolean blackKChecked)
+                     Stack<GameState> boardHistory, boolean whiteKChecked, boolean blackKChecked,
+                     int enPassantTargetSquare, Color enPassantTargetColor)
     {
         this.layoutBitboards = EngineCore.deepCopyBitboards(layoutBitboards);
         this.whiteBitboard = wBitboard ;
@@ -26,6 +32,8 @@ public class GameState {
         this.boardHistory = boardHistory ;
         this.isWhiteKingChecked = whiteKChecked ;
         this.isBlackKingChecked = blackKChecked ;
+        this.enPassantTargetSquare = enPassantTargetSquare;
+        this.enPassantTargetColor = enPassantTargetColor;
     }
 
     public long[][] getLayoutBitboards()
@@ -56,5 +64,13 @@ public class GameState {
     public boolean isBlackKingChecked()
     {
         return isBlackKingChecked;
+    }
+
+    public int getEnPassantTargetSquare() {
+        return enPassantTargetSquare;
+    }
+
+    public Color getEnPassantTargetColor() {
+        return enPassantTargetColor;
     }
 }

@@ -1,5 +1,9 @@
 package github.OthmaneHachad;
 
+/**
+ * Stores precomputed moves for every piece at every possible square.
+ * Is run at Application start to have those moves at the disposal of the engine
+ */
 public class EngineCore {
 
     // private

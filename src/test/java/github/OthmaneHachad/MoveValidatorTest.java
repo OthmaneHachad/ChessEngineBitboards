@@ -62,6 +62,27 @@ class MoveValidatorTest {
                 PieceType.PAWN, Color.WHITE, null); // Assuming move from a2 to a6
         assertEquals(false, validator.pawnMoveLegal(illegalMove));
 
+
+    }
+
+    @Test
+    void testEnPassantPawnMoveLegal() {
+        // scenario 1: enpassant possibility, white pawn does it on black pawn
+        Move whitePawnAdvanceTwoSquare = new Move(10, 26, PieceType.PAWN, Color.WHITE, null) ;
+        Move whitePawnEnPassantPosition = new Move(26, 34, PieceType.PAWN, Color.WHITE, null) ;
+        Move blackPawnAdvanceTwoSquare = new Move(51, 35, PieceType.PAWN, Color.BLACK, null) ;
+
+        chessBoard.movePiece(whitePawnAdvanceTwoSquare);
+        chessBoard.movePiece(whitePawnEnPassantPosition);
+        chessBoard.movePiece(blackPawnAdvanceTwoSquare);
+
+        // en passant can be achieved white pawn from 34 -> 43
+        Move whitePawnAchieveEnPassant =
+                new Move(36, 43, PieceType.PAWN, Color.WHITE, PieceType.PAWN) ;
+        assertEquals(true, validator.pawnMoveLegal(whitePawnAchieveEnPassant)) ;
+
+
+
     }
 
 

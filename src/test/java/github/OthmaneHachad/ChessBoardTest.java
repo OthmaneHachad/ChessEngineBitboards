@@ -318,11 +318,16 @@ class ChessBoardTest {
         // 0b00000000_00000000_00000000_00000010_00000000_00001000_00000000_00000000L
         // assert moving piece layout bitboard updated
 
+        System.out.println("w bishop after: ") ;
+        System.out.println(Long.toBinaryString(wBishopAfter)) ;
+        System.out.println(Long.toBinaryString(0b00000000_00000000_00000010_00000000_00000000_00001000_00000000_00000000L)) ;
+
         // Bishop
         assertEquals(
                 0b00000000_00000000_00000010_00100000_00000000_00000000_00000000_00000000L,
                 wBishopBefore
         );
+
         assertEquals(
                 0b00000000_00000000_00000010_00000000_00000000_00001000_00000000_00000000L,
                 wBishopAfter
@@ -364,6 +369,34 @@ class ChessBoardTest {
             // assert color bitboard has been updated
         // assert that the kings are in the correct check states
         // assert the FEN data updates are correct
+
+    }
+
+
+    @Test
+    void testEnPassantMovePiece() {
+
+        EngineCore engine = new EngineCore() ;
+        ChessBoard cb_en_passant = new ChessBoard("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPP1PPPP/RNBQKBNR b KQkq e6 0 2");
+        System.out.println(cb_en_passant.getEnPassantTargetSquare()) ;
+
+        long whitePawnsAfterEnPassant = 0b00000000_00000000_00001000_00000000_00000000_00000000_11110111_00000000L ;
+        long blackPawnsAfterEnPassant = 0b00000000_11110111_00000000_00000000_00000000_00000000_00000000_00000000L ;
+
+        System.out.println(cb_en_passant) ;
+
+
+        Move whitePawnEnPassantOnBlack = new Move(36, 43, PieceType.PAWN, Color.WHITE, PieceType.PAWN) ;
+        cb_en_passant.movePiece(whitePawnEnPassantOnBlack);
+
+        System.out.println("white: \n"  + Long.toBinaryString(cb_en_passant.getLayoutBitboards()[PieceType.PAWN.ordinal()][Color.WHITE.ordinal()]) + "\n" + Long.toBinaryString(whitePawnsAfterEnPassant)) ;
+        System.out.println("black: \n"  + Long.toBinaryString(cb_en_passant.getLayoutBitboards()[PieceType.PAWN.ordinal()][Color.BLACK.ordinal()]) + "\n" + Long.toBinaryString(blackPawnsAfterEnPassant)) ;
+
+        System.out.println(cb_en_passant) ;
+
+
+        assertEquals(true, cb_en_passant.getLayoutBitboards()[PieceType.PAWN.ordinal()][Color.WHITE.ordinal()] == whitePawnsAfterEnPassant);
+        assertEquals(true, cb_en_passant.getLayoutBitboards()[PieceType.PAWN.ordinal()][Color.BLACK.ordinal()] == blackPawnsAfterEnPassant);
 
     }
 
