@@ -229,10 +229,7 @@ public class EngineCore {
             }
         }
 
-
-
         return moves ;
-
 
     }
 

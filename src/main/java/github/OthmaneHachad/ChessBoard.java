@@ -32,6 +32,11 @@ public class ChessBoard {
     public boolean isWhiteKingChecked ;
     public boolean isBlackKingChecked ;
 
+    // en passant bitboards for Pawns - the 1s represent the pawns elegible
+            // to be performed en passant ON
+    public long[] eligibleEnPassantPawns ;
+
+
 
 
     // constructor to build the default position
@@ -49,10 +54,16 @@ public class ChessBoard {
         this.isWhiteKingChecked = false ;
         this.isBlackKingChecked = false ;
 
+        this.eligibleEnPassantPawns = new long[Color.values().length];
+        this.eligibleEnPassantPawns[Color.BLACK.ordinal()] =
+                0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L ;
+        this.eligibleEnPassantPawns[Color.WHITE.ordinal()] =
+                0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L ;
+
         this.boardHistory = new Stack<GameState>() ;
     }
 
-    // constructor to build a specific position
+    // constructor to build a correct Chessboard (King included)
     public ChessBoard(String fen)
     {
         this.layoutBitboards = new long[PieceType.values().length][Color.values().length] ;
@@ -66,6 +77,24 @@ public class ChessBoard {
 
         this.isWhiteKingChecked = this.isKingChecked(Color.WHITE);
         this.isBlackKingChecked = this.isKingChecked(Color.BLACK);
+
+        this.boardHistory = new Stack<GameState>() ;
+    }
+
+    // constructor to build a specific position
+    public ChessBoard(String fen, boolean kingThere)
+    {
+        this.layoutBitboards = new long[PieceType.values().length][Color.values().length] ;
+        this.pieceMoveBitboards = new long[PieceType.values().length][Color.values().length] ;
+        this.setupPosition(fen);
+        this.setBoardInfo(fen);
+
+        this.setWhiteBitboard();
+        this.setBlackBitboard();
+        Judge = new MoveValidator(this);
+
+        this.isWhiteKingChecked = kingThere == false ? false : this.isKingChecked(Color.WHITE);
+        this.isBlackKingChecked = kingThere == false ? false : this.isKingChecked(Color.BLACK);
 
         this.boardHistory = new Stack<GameState>() ;
     }
@@ -93,7 +122,7 @@ public class ChessBoard {
         // for potential captured piece
         if (move.getPieceCaptured() != null)
         {
-            System.out.println("starting updating process for captured piece");
+            //System.out.println("starting updating process for captured piece");
             Color c = move.getColor() == Color.WHITE ? Color.BLACK : Color.WHITE ;
             long capturedPieceBitboard = this.getLayoutBitboards()[move.getPieceCaptured().ordinal()][c.ordinal()];
             long removePieceBitboard = ~(1L << move.getEndPosition()) ;
@@ -127,7 +156,6 @@ public class ChessBoard {
 
     public void saveCurrentState()
     {
-        // TODO : implement saveCurrentState()
         GameState state = new GameState(this.getLayoutBitboards(), this.getWhiteBitboard(),
                 this.getBlackBitboard(), this.boardHistory, this.isWhiteKingChecked, this.isBlackKingChecked);
         this.boardHistory.push(state);
@@ -135,7 +163,6 @@ public class ChessBoard {
 
     public GameState restorePreviousState()
     {
-        // TODO : implement restorePreviousState()
         GameState state = this.boardHistory.pop();
 
         this.layoutBitboards = EngineCore.deepCopyBitboards(state.getLayoutBitboards()) ;
@@ -149,7 +176,6 @@ public class ChessBoard {
 
     public void undoMove()
     {
-        // TODO: implement undoMove()
         if (!boardHistory.isEmpty())
         {
             this.restorePreviousState() ;
@@ -273,7 +299,7 @@ public class ChessBoard {
         for (int r = 0; r < board.length; r++) {
             // s initialized at 7 because black pieces at the top values
             int column = 0;  // Initialize column counter
-            System.out.println(board[board.length-r-1]);
+            //System.out.println(board[board.length-r-1]);
 
             for (int i = 0; i < board[board.length-r-1].length(); i++) {
                 char ch = board[board.length-r-1].charAt(i);
@@ -305,9 +331,9 @@ public class ChessBoard {
      */
     public void setPiece(PieceType pieceType, Color color, int row, int column)
     {
-        System.out.print("row: " + row + " column: " + column + "  ");
+        //System.out.print("row: " + row + " column: " + column + "  ");
         int position = row * 8 + column ;
-        System.out.println("position: " + position);
+        //System.out.println("position: " + position);
         this.setLayoutBitboards(pieceType, color, position);
         
     }

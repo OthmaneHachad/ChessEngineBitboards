@@ -68,7 +68,7 @@ class MoveValidatorTest {
     @Test
     void testRookMoveLegal() {
         // Set up the board position using the FEN string
-        ChessBoard chessBoard = new ChessBoard("8/8/2p5/2P5/3R4/2P5/2p5/8 w - - 0 1");
+        ChessBoard chessBoard = new ChessBoard("8/8/2p5/2P5/3R4/2P5/2p5/8 w - - 0 1", false);
         MoveValidator validator = new MoveValidator(chessBoard);
 
         System.out.println(chessBoard);
@@ -121,7 +121,7 @@ class MoveValidatorTest {
     void testBishopMoveLegal()
     {
         // Set up the board position using the FEN string
-        ChessBoard chessBoard = new ChessBoard("8/8/1pp5/8/3B4/8/1Pp5/8 w - - 0 1");
+        ChessBoard chessBoard = new ChessBoard("8/8/1pp5/8/3B4/8/1Pp5/8 w - - 0 1", false);
         MoveValidator validator = new MoveValidator(chessBoard);
 
         // Scenario 1: Basic Diagonal Movement Up-Right 1 square
@@ -160,7 +160,7 @@ class MoveValidatorTest {
     @Test
     void testQueenMoveLegal() {
         // Set up the board position using the FEN string
-        ChessBoard chessBoard = new ChessBoard("8/p7/1Pp2p2/8/3Q4/8/1Pp5/P7 w - - 0 1");
+        ChessBoard chessBoard = new ChessBoard("8/p7/1Pp2p2/8/3Q4/8/1Pp5/P7 w - - 0 1", false);
         MoveValidator validator = new MoveValidator(chessBoard);
 
         // Horizontal and Vertical Movements
@@ -200,6 +200,19 @@ class MoveValidatorTest {
         assertEquals(true, validator.queenMoveLegal(diagonalDownLeft));
         assertEquals(false, validator.queenMoveLegal(blockedDownLeft));
         assertEquals(false, validator.queenMoveLegal(blockedUpLeft));
+    }
+
+    @Test
+    void testKingMoveLegal()
+    {
+        ChessBoard cb = new ChessBoard("8/3K2k1/1B1pP3/5B2/1pp3p1/3nPNn1/1b6/q2b4 w - - 0 1");
+        MoveValidator validator = new MoveValidator(cb);
+
+        assertEquals(true, validator.kingMoveLegal(new Move(51, 59, PieceType.KING, Color.WHITE, null)));
+        assertEquals(true, validator.kingMoveLegal(new Move(51, 43, PieceType.KING, Color.WHITE, PieceType.PAWN)));
+        assertEquals(false, validator.kingMoveLegal(new Move(54, 55, PieceType.KING, Color.BLACK, null)));
+
+
     }
 
 

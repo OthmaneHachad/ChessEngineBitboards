@@ -176,18 +176,29 @@ public class MoveValidator {
 
 
 
-    private boolean kingMoveLegal(Move move)
-    {
-        // update board with potential move
-        this.chessboard.movePiece(move);
-        if (chessboard.isKingChecked(move.getColor()))
-        {
-            // TODO: add chessboard undo move
-            return false ;
+    public boolean kingMoveLegal(Move move) {
+        // First, check if the move is within the king's move pattern
+        boolean isMovePatternValid = (EngineCore.getKING_MOVE_MASK()[move.getStartPosition()] & (1L << move.getEndPosition())) != 0;
+        if (!isMovePatternValid) {
+            // If the move is not within the king's move pattern, it's illegal
+            return false;
         }
-        return ( core.getKING_MOVE_MASK()[move.getStartPosition()]
-                & 1L << (move.getEndPosition()) ) == 0 ;
+
+        // Temporarily make the move on the chessboard
+        chessboard.movePiece(move);
+
+        // Check if the move results in the king being in check
+        if (chessboard.isKingChecked(move.getColor())) {
+            chessboard.undoMove(); // Undo the move since it's illegal
+            return false;
+        }
+
+
+        // If the king is not checked and the move pattern is valid, the move is legal
+        chessboard.undoMove(); // Undo the move as this was just a check
+        return true;
     }
+
 
     public boolean pawnMoveLegal(Move move) {
 
@@ -197,7 +208,7 @@ public class MoveValidator {
         )
         {
             // Means the square is not reachable by piece - unavailable in database
-            System.out.println("Target Square unreachable by piece - not found in db");
+            //System.out.println("Target Square unreachable by piece - not found in db");
             return false ;
         }
 

@@ -2,6 +2,7 @@ package github.OthmaneHachad;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +23,7 @@ class ChessBoardTest {
     @Test
     public void testsetLayoutBitboardsWhite() {
 
-        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
+        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1", false);
 
         // Assume that 0 is the ordinal for PAWN and 1 is for WHITE
         int pieceTypeOrdinal = PieceType.PAWN.ordinal();
@@ -48,7 +49,7 @@ class ChessBoardTest {
     @Test
     public void testsetLayoutBitboardsBlack() {
 
-        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
+        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1", false);
 
         // Assume that 0 is the ordinal for PAWN and 1 is for WHITE
         int pieceTypeOrdinal = PieceType.PAWN.ordinal();
@@ -74,7 +75,7 @@ class ChessBoardTest {
     @Test
     public void testSetPiece()
     {
-        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1");
+        ChessBoard chessBoardEmpty = new ChessBoard("8/8/8/8/8/8/8/8 w - - 0 1", false);
         // Assume that 0 is the ordinal for PAWN and 1 is for WHITE
         int pieceTypeOrdinal = PieceType.PAWN.ordinal();
         int colorOrdinal = Color.WHITE.ordinal();
@@ -313,7 +314,6 @@ class ChessBoardTest {
         long whitePiecesAfter = cb.getWhiteBitboard() ;
         long blackPiecesAfter = cb.getBlackBitboard() ;
 
-        // TODO: Implement this test testMovePiece
         // 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L
         // 0b00000000_00000000_00000000_00000010_00000000_00001000_00000000_00000000L
         // assert moving piece layout bitboard updated
@@ -370,7 +370,6 @@ class ChessBoardTest {
     @Test
     void testUndoMove()
     {
-        // TODO: fix copying issue when retrieving game states etc
         EngineCore engine = new EngineCore() ;
         ChessBoard cb = new ChessBoard("8/3K2k1/1B1pP3/5B2/1pp3p1/3nPNn1/1b6/q2b4 w - - 0 1");
         Move wBishopCaptureBKnight = new Move(37, 19, PieceType.BISHOP, Color.WHITE, PieceType.KNIGHT);
@@ -419,6 +418,15 @@ class ChessBoardTest {
 
     }
 
+    @Test
+    void testGetPiecePosition()
+    {
+        EngineCore engine = new EngineCore() ;
+        ChessBoard cb = new ChessBoard("8/3K2k1/1B1pP3/5B2/1pp3p1/3nPNn1/1b6/q2b4 w - - 0 1");
+
+        ArrayList<Integer> KingPositions = cb.getPiecePosition(PieceType.KING, Color.WHITE); // 1L << 51
+        assertEquals(51, KingPositions.get(0));
+    }
 
     @Test
     void testSetWhiteBitboard() {
